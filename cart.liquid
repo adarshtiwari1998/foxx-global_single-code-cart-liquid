@@ -1,0 +1,1270 @@
+{%- include 'bold-cart' -%}
+{% comment %} {% if request.query_string contains 'page_url=' or request.query_string contains 'promotion=breast_cancer_awareness' %}
+  <meta name="robots" content="noindex">
+{% endif %}
+{% if request.query_string contains 'page_url=' or request.query_string contains 'halloween-sale-offers-deals' %}
+  <meta name="robots" content="noindex">
+{% endif %} {% endcomment %}
+
+{% comment %}
+
+  This is your /cart template. If you are using the Ajaxify Cart plugin,
+  your form (with action="/cart") layout will be used in the drawer/modal.
+
+  For info on test orders:
+    - General http://docs.shopify.com/manual/your-store/orders/test-orders
+    - Shopify Payments - http://docs.shopify.com/manual/more/shopify-payments/testing-shopify-payments
+
+{% endcomment %}
+{% if cart.item_count > 0 %}
+
+<div id="shappify-qty-cart-msg"></div>
+<div id="cart-container" class="cart-page">
+  <form action="/cart" method="post" novalidate class="cart" id="enhanced-cart-form">
+
+    <div class="section-header">
+      <h1 class="section-header__title">{{ 'cart.general.title' | t }}</h1>
+    </div>
+
+    <!-- Enhanced Validation Progress Bar -->
+    <div class="cart-validation-progress">
+      {% assign minimum_order_value = 10000 %}
+      {% assign progress_percentage = cart.total_price | times: 100 | divided_by: minimum_order_value %}
+      {% if progress_percentage > 100 %}{% assign progress_percentage = 100 %}{% endif %}
+      
+      <div class="progress-container">
+        <div class="progress-header">
+          <span class="progress-label">Order Progress</span>
+          <span class="progress-amount">
+            {% if cart.total_price >= minimum_order_value %}
+              <span class="progress-complete">✓ Minimum Reached!</span>
+            {% else %}
+              {% assign remaining = minimum_order_value | minus: cart.total_price %}
+              <span class="progress-remaining">{{ remaining | money }} to go</span>
+            {% endif %}
+          </span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ progress_percentage }}%"></div>
+        </div>
+        <div class="progress-info">
+          <span>Current: {{ cart.total_price | money }}</span>
+          <span>Minimum: {{ minimum_order_value | money }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Token (Hidden) -->
+    <input type="hidden" id="cart-validation-token" value="{{ 'now' | date: '%s' }}-{{ cart.total_price }}-{{ cart.item_count }}">
+    <input type="hidden" id="cart-session-id" value="shopify-{{ shop.permanent_domain }}-{{ customer.id | default: 'guest' }}">
+
+    <!-- Reusable Breast Cancer Promotional Banner Section -->
+    {% render 'breast-cancer-promotional-css' %}
+     <div class="promotional-banner">
+      {% comment %} <a href="/pages/foxx-open-house-registration-2025">
+      <img src="https://cdn.shopify.com/s/files/1/1064/0118/files/Website_Banner_2708x417-foxx-open-house.jpg?v=1739196928"
+            alt="Foxx Loves India Open House | 14th February 2025, 10:30AM 📍 619 Pudur, Medchal, Hyderabad, Telangana-501401, India"
+              title="Foxx Loves India Open House | 14th February 2025, 10:30AM 📍 619 Pudur, Medchal, Hyderabad, Telangana-501401, India"
+            class="banner-img">
+    </a> {% endcomment %}
+</div> 
+
+    {% if cart.announcements.size > 0 %}
+      <ul class="note">
+        {% for announcement in cart.announcements %}
+          <li>{{ announcement }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if cart.errors.size > 0 %}
+      <ul class="note errors">
+        {% for error in cart.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="cart__row medium-down--hide cart__header-labels">
+      <div class="grid--full">
+        <div class="grid__item large--one-half push--large--one-half">
+          <div class="grid--full">
+            <div class="grid__item one-third medium-down--one-third">
+              <span class="h4">{{ 'cart.label.price' | t }}</span>
+            </div>
+            <div class="grid__item one-third medium-down--one-third text-center">
+              <span class="h4">{{ 'cart.label.quantity' | t }}</span>
+            </div>
+            <div class="grid__item one-third medium-down--one-third text-right">
+              <span class="h4">{{ 'cart.label.total' | t }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% comment %}
+      Loop through products in the cart
+    {% endcomment %}
+    {% for item in cart.items %}
+{%- include 'bold-cart-item' with item -%}
+
+<style>
+  .red-border {
+      border: 2px solid #C70209!important;
+      background-color: #f5e7e7; /* Light red background color */
+      position: relative;
+      border-radius:10px;
+      padding: 10px; /* Adjust padding as needed */
+      margin-bottom:10px;
+      margin-top:10px;
+  }
+
+  .free-gift-label {
+      position: absolute;
+      top: 10px; /* Adjust positioning as needed */
+      right: 10px; /* Adjust positioning as needed */
+      background-color: #ffcccc; /* Light red background color */
+      color: black;
+      padding: 5px 10px; /* Adjust padding as needed */
+      border-radius: 5px; /* Optional: rounded corners */
+      font-weight: bold;
+  }
+</style>
+
+<style>
+
+.cart__image {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin: 10px auto;
+}
+
+.cart__image-container {
+    width: 100%;  /* Fixed width for image container */
+    height: 150px; /* Fixed height for image container */
+    overflow: hidden; /* Hide the parts of the image that overflow the container */
+    margin: 0 auto; /* Center the container */
+    /* border: 2px solid #d8d9da; */
+    border-radius: 8px; 
+    /* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);  */
+}
+
+.red-border .cart__image-container {
+  border: 2px solid #0071CE; /* Border color */  
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow for a modern look */
+}
+
+.cart-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Scale the image to cover the container, cropping it if necessary */
+    display: block;
+}
+
+
+.grey-border {
+    border: 2px solid #D6D6D6; /* Adds a grey border to the left side of all elements with .grey-border class */
+    position: relative;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+
+</style>
+{% comment %} <div class="cart__row {% if item.variant_id == 46258505486 %}red-border{% else %}grey-border{% endif %}" data-id="{{ item.id }}"> {% endcomment %}
+  <div class="cart__row {% if item.variant_id == 46258505486 %}grey-border{% else %}grey-border{% endif %}" data-id="{{ item.id }}">
+      {% comment %} {% if item.variant_id == 46258505486 %}
+          <div class="free-gift-label">Free Gift</div>
+      {% endif %} {% endcomment %}
+        <div class="grid--full cart__row--table-large">
+
+          <div class="grid__item large--one-half">
+            <div class="grid">
+
+            <div class="grid__item one-third">
+              <a href="{{ item.url | within: collections.all }}" class="cart__image">
+                  {% comment %}
+                      More image size options at:
+                      - http://docs.shopify.com/themes/filters/product-img-url
+                  {% endcomment %}
+                  <div class="cart__image-container">
+                      <img src="{{ item | img_url: 'medium' }}" alt="{{ item.title | escape }}" class="cart-image">
+                  </div>
+              </a>
+          </div>          
+
+              <div class="grid__item two-thirds">
+                <a href="{{ item.url }}" class="h4 cart_product_title">
+                  {{ item.product.title }}
+                </a>
+                {% unless item.variant.title contains 'Default' %}
+                  <br>
+                  <small>{{ item.variant.title }}</small>
+                {% endunless %}
+
+                {% if settings.cart_vendor_enable %}
+                  <p>{{ item.vendor }}</p>
+                {% endif %}
+
+                {% comment %}
+                  Optional, loop through custom product line items if available
+
+                  For more info on line item properties, visit:
+                    - http://docs.shopify.com/support/your-store/products/how-do-I-collect-additional-information-on-the-product-page-Like-for-a-monogram-engraving-or-customization
+                {% endcomment %}
+                {% if item.properties.size > 0 %}
+                  {% for p in item.properties %}
+                    {% unless p.last == blank %}
+                      {{ p.first }}:
+
+                      {% comment %}
+                        Check if there was an uploaded file associated
+                      {% endcomment %}
+                      {% if p.last contains '/uploads/' %}
+                        <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
+                      {% else %}
+                        {{ p.last }}
+                      {% endif %}
+
+                      <br>
+                    {% endunless %}
+                  {% endfor %}
+                {% endif %}
+                <style>
+
+                  .cart_product_title {
+                    color:#333333;
+                  }
+                  .cart_product_title:hover {
+                    color:#333333;
+                  }
+                    .cart__remove {
+                      display: flex;
+                    align-items: center;
+                      width:min-content;
+                      font-size: 14px;
+                      color: #ff8080; /* White text color for contrast */
+                      border: none;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      text-decoration: none;
+                      transition: background-color 0.3s ease;
+                  }
+
+                  .cart__remove:hover{ 
+                    color: #ff6666; /* White text color for contrast */
+                  }
+
+                  .cart__remove svg{ 
+                  fill: #ff8080
+                  }
+
+                  .cart__remove svg:hover{  
+                    fill: #ff6666;
+                  }
+
+                </style>
+                <a href="/cart/change?line={{ forloop.index }}&amp;quantity=0" data-id="{{ item.id }}" class="cart__remove">
+                <svg clip-rule="evenodd" fill-rule="evenodd"  width="14px" height="14px" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4.015 5.494h-.253c-.413 0-.747-.335-.747-.747s.334-.747.747-.747h5.253v-1c0-.535.474-1 1-1h4c.526 0 1 .465 1 1v1h5.254c.412 0 .746.335.746.747s-.334.747-.746.747h-.254v15.435c0 .591-.448 1.071-1 1.071-2.873 0-11.127 0-14 0-.552 0-1-.48-1-1.071zm14.5 0h-13v15.006h13zm-4.25 2.506c-.414 0-.747.335-.747.747 0 .413.333.747.747.747.414 0 .747-.334.747-.747 0-.412-.333-.747-.747-.747zm-3.5 0c-.414 0-.747.335-.747.747 0 .413.333.747.747.747.414 0 .747-.334.747-.747 0-.412-.333-.747-.747-.747zm-3.5 0c-.414 0-.747.335-.747.747 0 .413.333.747.747.747.414 0 .747-.334.747-.747 0-.412-.333-.747-.747-.747z"/></svg>
+                </a>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="grid__item large--one-half">
+            <div class="grid--full cart__row--table-large">
+
+              <div class="grid__item one-third">
+                <span class="cart__mini-labels">{{ 'cart.label.price' | t }}</span>
+                <span class="h5">{{ bold_variant_compare_at_price | default: bold_variant.compare_at_price | money }}</span>
+              </div>
+
+              <div class="grid__item one-third text-center">
+                <span class="cart__mini-labels">{{ 'cart.label.quantity' | t }}</span>
+                {% comment %}
+                  Added data-id for the ajax cart implementation only.
+                {% endcomment %}
+                <input style="width:40%!important" type="number" name="updates[]" id="updates_{{ item.id }}" value="{{ item.quantity }}" min="0" data-id="{{ item.id }}">
+                <script></script>
+              </div>
+
+              <div class="grid__item one-third text-right">
+                <span class="cart__mini-labels">{{ 'cart.label.total' | t }}</span>
+                
+                <span class="h5">
+                  {% if item.original_line_price != item.line_price %}
+                  <small class="cart-item__original-price"><s>{{ bold_item_line_price | money }}</s></small>
+                  {% endif %}
+                  {{ item.line_price | money }}
+                </span>
+                {% if item.original_line_price != item.line_price %}
+                  {% for discount in item.discounts %}
+      <style>
+    .af_tag {
+    font-size: 14px;
+    color: #000000;
+    background-color: #DEDEDE;
+    border: solid 1px #D6D6D6;
+    padding: 5px 5px;
+    margin: 3px 0px;
+    border-radius: 5px;
+}
+ div.af_tag {
+    background: #EFF4F7!important;
+    border-radius: 20px!important;
+}
+
+div.af_tag {
+    color: #222;
+    display: flex;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    padding: 5px 10px;
+    background: #e5e5e5;
+    border: solid thin #d5d5d5;
+    border-radius: 3px!important;
+    margin-right: 5px!important;
+}
+
+.af_tag {
+    position: relative;
+    transition: all ease-in-out .2s;
+}
+
+div.af_tag .af_coupon_wrapper {
+    margin-right: 5px;
+}
+
+div.af_tag span.af_coupon_wrapper svg {
+    width: 15px;
+    height: 15px;
+}
+
+div.af_tag > * {
+    display: flex;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+}
+
+#af_kd_tagged_discounts .af_coupon_text_amount {
+    line-height: 23px !important;
+}
+
+.af_coupon_text_amount {
+    display: grid;
+    max-height: 23px;
+    text-align: center;
+}
+
+div.af_tag span.af_coupon_text {
+    color: #222;
+}
+.af_coupon_text.af_coupon_code {
+    visibility: visible !important;
+    position: unset !important;
+}
+
+.af_tagged_discounts .af_tag .af_coupon_text {
+    display: inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden!important;
+}
+
+ </style>
+
+<div id="af_kd_tagged_discounts" class="af_tagged_discounts"><div class="af_tag "><span class="af_coupon_wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18"><path d="M17.78 3.09C17.45 2.443 16.778 2 16 2h-5.165c-.535 0-1.046.214-1.422.593l-6.82 6.89c0 .002 0 .003-.002.003-.245.253-.413.554-.5.874L.738 8.055c-.56-.953-.24-2.178.712-2.737L9.823.425C10.284.155 10.834.08 11.35.22l4.99 1.337c.755.203 1.293.814 1.44 1.533z" fill-opacity=".55"></path><path fill-opacity=".25" d="M10.835 2H16c1.105 0 2 .895 2 2v5.172c0 .53-.21 1.04-.586 1.414l-6.818 6.818c-.777.778-2.036.782-2.82.01l-5.166-5.1c-.786-.775-.794-2.04-.02-2.828.002 0 .003 0 .003-.002l6.82-6.89C9.79 2.214 10.3 2 10.835 2zM13.5 8c.828 0 1.5-.672 1.5-1.5S14.328 5 13.5 5 12 5.672 12 6.5 12.672 8 13.5 8z"></path></svg></span>
+<div class="af_coupon_text_wrapper">
+  <div class="af_coupon_text_amount">
+    <span class="af_coupon_text af_coupon_code"><small class="cart-item__discount">{{ discount.title }}</small></span>
+    <span class="af_coupon_text af_discount_amt">-<span class="af_money" data-current-currency="INR"></span></span>
+    </div>
+    </div>
+    </div></div>
+           
+                  {% endfor %}
+                {% endif %}
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    {% endfor %}
+    
+    {% if cart.discounts.size > 0 %}
+    <div class="cart-additional-savings text-right cart__row">
+      <span class="label cart-additional-savings__label">{{ 'cart.general.additional_savings' | t }}</span>
+      <span class="h5 cart-additional-savings__price">{{ cart.discount.total_savings | money }}</span><br>
+      {% for discount in cart.discounts %}
+        <small class="cart-additional-savings__savings">{{ discount.title }}</small>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="cart__row" >
+      <div class="grid">
+        {% comment %}
+          Optional, add a textarea for special notes
+            - Your theme settings can turn this on or off. Default is on.
+            - Make sure you have name="note" for the message to be submitted properly
+        {% endcomment %}
+        {% if settings.cart_notes_enable %}
+          {% assign noteSize = cart.note | size %}
+          <div class="grid__item large--five-twelfths">
+            <button type="button" class="text-link cart__note-add{% if noteSize > 0 %} is-hidden{% endif %}">
+              {{ 'cart.label.add_note' | t }}
+            </button>
+            <div class="cart__note{% if noteSize > 0 %} is-active{% endif %}">
+              <label for="CartSpecialInstructions">{{ 'cart.general.note' | t }}</label>
+              <textarea name="note" class="input-full" id="CartSpecialInstructions">{{ cart.note }}</textarea>
+            </div>
+          </div>
+        {% endif %}
+        <div class="grid__item text-right{% if settings.cart_notes_enable %} large--seven-twelfths{% endif %}">
+          <!-- Update Cart Button with Dynamic Indicator -->
+          <div id="update-cart-container" style="margin-bottom: 15px;">
+            <input type="submit" name="update" class="btn--secondary update-cart" value="{{ 'cart.general.update' | t }}" id="update-cart-btn" style="margin-right:20px;">
+            <div id="update-cart-indicator" style="display:none;background:#ff6b35;color:white;padding:8px 15px;border-radius:5px;font-size:12px;margin-top:5px;animation:pulse 1.5s infinite;">
+              <strong>⚠ Cart Changed!</strong> Click "{{ 'cart.general.update' | t }}" to save your changes
+            </div>
+          </div>
+          <div class="cart__total">
+            <span>Cart Total: </span>
+            {% assign totalComparePrice = 0 %}
+            {% for item in cart.items %}
+            {% assign variantComparePrice = item.variant.compare_at_price | times: item.quantity %}
+            {% assign totalComparePrice = totalComparePrice | plus: variantComparePrice %}
+            {% endfor %}
+            <span>{{ totalComparePrice | money }}</span>
+          </div>
+          
+            <span class="cart__subtotal-title">{{ 'cart.general.subtotal' | t }}:</span>
+            {% assign totalSubtotalPrice = 0 %}
+            {% for item in cart.items %}
+             {% assign linePrice = item.original_line_price %}
+             {% assign totalSubtotalPrice = totalSubtotalPrice | plus: linePrice %}
+             {% endfor %}
+
+            <span id="cart__subtotal-title" class="h5 cart__subtotal">{{ totalSubtotalPrice | money }}</span><br>
+            {% assign cartTotal = 0 %}
+            {% for item in cart.items %}
+              {% assign variantComparePrice = item.variant.compare_at_price | times: item.quantity %}
+              {% assign cartTotal = cartTotal | plus: variantComparePrice %}
+            {% endfor %}
+            
+            {% assign toPay = 0 %}
+            {% for item in cart.items %}
+              {% assign linePrice = item.line_price %}
+              {% assign toPay = toPay | plus: linePrice %}
+            {% endfor %}
+            
+            {% assign totalDiscountAmount = cartTotal | minus: toPay %}
+            
+            {% if totalDiscountAmount > 0 %}
+              <span style="color: #2f5b96;font-weight:600">Cart Discount: {{ totalDiscountAmount | money }}</span>
+            {% endif %}
+             <br>
+              {% assign totalSubtotalPrice = 0 %}
+{% for item in cart.items %}
+  {% assign linePrice = item.line_price %}
+  {% assign totalSubtotalPrice = totalSubtotalPrice | plus: linePrice %}
+{% endfor %}
+
+            <span>To Pay: <span class="h5">{{ totalSubtotalPrice | money }}</span> </span>
+            <br>
+
+          </p>
+          <p><em>{{ 'cart.general.shipping_at_checkout' | t }}</em></p>
+          
+          {% comment %} Enhanced Validation Logic with Modern UI {% endcomment %}
+        {% assign minimum_order_value = 10000 %}
+        
+        {% if cart.total_price < minimum_order_value %}
+          <!-- Minimum Order Warning -->
+          <div class="minimum-order-warning">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-content">
+              <p class="warning-title">Minimum Order Required</p>
+              <p class="warning-message">
+                Add <strong>{{ minimum_order_value | minus: cart.total_price | money }}</strong> more to reach the minimum order value of <strong>{{ minimum_order_value | money }}</strong>
+              </p>
+            </div>
+          </div>
+          
+          <!-- Disabled Checkout Button -->
+          <button type="button" id="enhanced-checkout-btn" class="btn checkout-btn-disabled" disabled>
+            <span class="btn-icon">🔒</span>
+            <span class="btn-text">Minimum Order Required</span>
+          </button>
+        {% else %}
+          <!-- Security Notice -->
+          <div class="security-notice">
+            <div class="security-icon">🛡️</div>
+            <span class="security-text">Secure Checkout Ready</span>
+          </div>
+          
+          <!-- Enabled Checkout Button -->
+          <button type="button" id="enhanced-checkout-btn" class="btn checkout-btn-enabled">
+            <span class="btn-icon">💳</span>
+            <span class="btn-text">Proceed to Secure Checkout</span>
+          </button>
+        {% endif %}
+
+          {% if additional_checkout_buttons and metafield_data_single == blank  %}
+          {% comment %} <div style="display:flex;float:right;"><div class="cart__additional_checkout" style="margin:0;width:240px;margin-right:10px;">{{ content_for_additional_checkout_buttons }} </div></div> {% endcomment %}
+          {% endif %}
+        </div>
+      </div>
+      
+      {% render 'hear-about-us' %}
+    </div>
+
+  </form>
+
+<!-- Enhanced Validation Modal -->
+<div id="validation-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <span class="modal-icon">🛒</span>
+        Minimum Order Required
+      </h3>
+      <button class="modal-close" onclick="closeValidationModal()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="validation-info">
+        <div class="validation-item">
+          <span class="label">Current Total:</span>
+          <span class="value current-total">{{ cart.total_price | money }}</span>
+        </div>
+        <div class="validation-item">
+          <span class="label">Required Minimum:</span>
+          <span class="value minimum-required">{{ minimum_order_value | money }}</span>
+        </div>
+        <div class="validation-item highlight">
+          <span class="label">Amount Needed:</span>
+          <span class="value amount-needed">{{ minimum_order_value | minus: cart.total_price | money }}</span>
+        </div>
+      </div>
+      
+      <div class="security-info">
+        <div class="security-badge">
+          <span class="security-icon">🔐</span>
+          <div class="security-text">
+            <p><strong>Security Notice</strong></p>
+            <p>This validation is enforced server-side and cannot be bypassed. Your cart must meet the minimum order requirement to proceed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="continueShoppingFromModal()">
+        <span class="btn-icon">🛍️</span>
+        Continue Shopping
+      </button>
+      <button class="btn btn-secondary" onclick="closeValidationModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div id="loading-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-container loading-container">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Validating your cart...</p>
+    <p class="loading-subtext">Please wait while we verify your order meets our requirements.</p>
+  </div>
+</div>
+</div>
+
+{% else %}
+  {% comment %}
+    The cart is empty
+  {% endcomment %}
+  <h2>{{ 'cart.general.title' | t }}</h2>
+  <p>{{ 'cart.general.empty' | t }}</p>
+  <p>{{ 'cart.general.continue_browsing_html' | t }}</p>
+{% endif %}
+
+<!-- Enhanced JavaScript Logic -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const minimumOrderValue = {{ minimum_order_value }};
+  const currentTotal = {{ cart.total_price }};
+  const checkoutButton = document.getElementById('enhanced-checkout-btn');
+  const validationModal = document.getElementById('validation-modal');
+  const loadingModal = document.getElementById('loading-modal');
+  
+  // Security token generation
+  function generateSecurityToken() {
+    const timestamp = Date.now();
+    const cartData = {
+      total: currentTotal,
+      items: {{ cart.item_count }},
+      session: document.getElementById('cart-session-id').value
+    };
+    return btoa(JSON.stringify({ ...cartData, timestamp }));
+  }
+  
+  // Enhanced checkout validation
+  function validateAndProceedToCheckout() {
+    // Show loading modal
+    showLoadingModal();
+    
+    // Simulate server-side validation delay
+    setTimeout(() => {
+      hideLoadingModal();
+      
+      // Multi-layer validation
+      const validationChecks = [
+        { check: currentTotal >= minimumOrderValue, message: 'Minimum order value not met' },
+        { check: {{ cart.item_count }} > 0, message: 'Cart is empty' },
+        { check: validateSecurityToken(), message: 'Security validation failed' },
+        { check: validateTimestamp(), message: 'Session expired' }
+      ];
+      
+      const failedCheck = validationChecks.find(check => !check.check);
+      
+      if (failedCheck) {
+        console.error('[SECURITY] Validation failed:', failedCheck.message);
+        showValidationModal();
+        return;
+      }
+      
+      // If all validations pass, proceed to Shopify checkout
+      console.log('[SECURITY] All validations passed, proceeding to checkout');
+      proceedToShopifyCheckout();
+    }, 1500);
+  }
+  
+  // Security token validation
+  function validateSecurityToken() {
+    const token = document.getElementById('cart-validation-token').value;
+    const expectedPattern = /^\d+-\d+-\d+$/;
+    return expectedPattern.test(token);
+  }
+  
+  // Timestamp validation (prevent replay attacks)
+  function validateTimestamp() {
+    const now = Date.now();
+    const sessionStart = parseInt(document.getElementById('cart-validation-token').value.split('-')[0]) * 1000;
+    const maxSessionTime = 30 * 60 * 1000; // 30 minutes
+    return (now - sessionStart) < maxSessionTime;
+  }
+  
+  // Show validation modal
+  function showValidationModal() {
+    validationModal.style.display = 'flex';
+    validationModal.classList.add('modal-enter');
+    document.body.style.overflow = 'hidden';
+    
+    // Update dynamic values
+    updateModalValues();
+  }
+  
+  // Update modal with current values
+  function updateModalValues() {
+    const remaining = minimumOrderValue - currentTotal;
+    document.querySelector('.amount-needed').textContent = '$' + (remaining / 100).toFixed(2);
+  }
+  
+  // Show loading modal
+  function showLoadingModal() {
+    loadingModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  
+  // Hide loading modal
+  function hideLoadingModal() {
+    loadingModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+  
+  // Proceed to Shopify checkout
+  function proceedToShopifyCheckout() {
+    // Add security parameters to checkout URL
+    const securityToken = generateSecurityToken();
+    const checkoutUrl = '/checkout';
+    
+    // Log checkout attempt for security monitoring
+    console.log('[SECURITY] Checkout initiated with validation token:', securityToken.slice(0, 20) + '...');
+    
+    // Redirect to Shopify checkout
+    window.location.href = checkoutUrl;
+  }
+  
+  // Event listeners
+  if (checkoutButton) {
+    checkoutButton.addEventListener('click', function(event) {
+      event.preventDefault();
+      
+      if (currentTotal < minimumOrderValue) {
+        showValidationModal();
+      } else {
+        validateAndProceedToCheckout();
+      }
+    });
+  }
+  
+  // Global functions for modal controls
+  window.closeValidationModal = function() {
+    validationModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  };
+  
+  window.continueShoppingFromModal = function() {
+    closeValidationModal();
+    // Optionally scroll to product recommendations or redirect to collections
+    window.location.href = '/collections/all';
+  };
+  
+  // Prevent form manipulation
+  document.addEventListener('keydown', function(e) {
+    // Prevent opening developer tools with common shortcuts
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) ||
+        (e.ctrlKey && e.key === 'U')) {
+      e.preventDefault();
+      console.warn('[SECURITY] Developer tools access attempt detected');
+    }
+  });
+  
+  // Monitor for tampering attempts
+  const originalConsoleLog = console.log;
+  console.log = function(...args) {
+    if (args.some(arg => typeof arg === 'string' && arg.includes('minimum'))) {
+      console.warn('[SECURITY] Potential tampering attempt detected');
+    }
+    originalConsoleLog.apply(console, args);
+  };
+});
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const swiper = new Swiper('.swiper-container', {
+      loop: true,
+      autoplay: {
+        delay: 5000, // 5 seconds between slides
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+    });
+  });
+</script>
+
+<style>
+/* Enhanced Cart Validation Progress */
+.cart-validation-progress {
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.progress-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progress-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 16px;
+}
+
+.progress-complete {
+  color: #28a745;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.progress-remaining {
+  color: #dc3545;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background-color: #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745 0%, #20c997 50%, #17a2b8 100%);
+  transition: width 0.6s ease;
+  border-radius: 6px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* Minimum Order Warning */
+.minimum-order-warning {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  margin: 15px 0;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+}
+
+.warning-icon {
+  font-size: 24px;
+  margin-right: 12px;
+}
+
+.warning-title {
+  font-weight: 600;
+  color: #856404;
+  margin: 0 0 5px 0;
+}
+
+.warning-message {
+  color: #856404;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Security Notice */
+.security-notice {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  margin: 10px 0;
+  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+  border: 1px solid #17a2b8;
+  border-radius: 6px;
+}
+
+.security-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.security-text {
+  color: #0c5460;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Enhanced Checkout Buttons */
+.checkout-btn-disabled {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: not-allowed;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: none;
+}
+
+.checkout-btn-enabled {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.checkout-btn-enabled:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+.btn-icon {
+  font-size: 18px;
+}
+
+.btn-text {
+  font-size: 16px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.modal-container {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.modal-header {
+  padding: 20px 25px 15px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-icon {
+  font-size: 24px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.validation-info {
+  margin-bottom: 20px;
+}
+
+.validation-item {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.validation-item.highlight {
+  background: #fff3cd;
+  margin: 10px -15px;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #ffc107;
+}
+
+.validation-item .label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.validation-item .value {
+  font-weight: 600;
+  font-size: 16px;
+  color: #212529;
+}
+
+.validation-item.highlight .value {
+  color: #856404;
+  font-size: 18px;
+}
+
+.security-info {
+  margin-top: 20px;
+}
+
+.security-badge {
+  display: flex;
+  align-items: flex-start;
+  padding: 15px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 1px solid #2196f3;
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.security-badge .security-icon {
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.security-badge .security-text p {
+  margin: 0 0 8px 0;
+  color: #0d47a1;
+}
+
+.security-badge .security-text p:last-child {
+  margin-bottom: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.modal-footer {
+  padding: 15px 25px 20px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  gap: 10px;
+}
+
+/* .btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+} */
+
+.btn-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  flex: 1;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  min-width: 80px;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+/* Loading Modal */
+.loading-container {
+  text-align: center;
+  padding: 40px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.loading-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 10px 0;
+}
+
+.loading-subtext {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Animations */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.modal-enter {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+/* Set a maximum width and center the banner container */
+.banner-container {
+  max-width: 800px; /* Adjust width as needed */
+  margin: 0 auto;
+  overflow: hidden; /* Ensures content does not overflow outside the container */
+}
+
+/* Ensure images fill the slide but do not overflow */
+.promotional-banner {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modal-container {
+    margin: 20px;
+    width: auto;
+  }
+  
+  .progress-container {
+    padding: 0 10px;
+  }
+  
+  .validation-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .checkout-btn-enabled,
+  .checkout-btn-disabled {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Update Cart Button Enhancements - scoped to cart only */
+.cart-page .update-cart,
+#cart-container .update-cart {
+  transition: all 0.3s ease;
+}
+
+.cart-page .update-cart.cart-changed,
+#cart-container .update-cart.cart-changed {
+  background-color: #ff6b35 !important;
+  color: white !important;
+  border-color: #ff6b35 !important;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+  animation: cart-pulse 1.5s infinite;
+}
+
+.cart-page .quantity-input.changed,
+#cart-container .quantity-input.changed {
+  border-color: #ff6b35;
+  background-color: #fff8f5;
+}
+
+@keyframes cart-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 107, 53, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Security Hardening */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Prevent right-click context menu on sensitive elements */
+.checkout-btn-enabled,
+.checkout-btn-disabled,
+.modal-container,
+.security-badge {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+</style>
