@@ -284,6 +284,11 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
         }
         
         // Fallback: manually truncate if Gemini fails
+        let baseAltText = productTitle;
+        if (variantInfo) {
+            baseAltText += ` | ${variantInfo}`;
+        }
+        
         const maxBaseLength = maxContentLength;
         let truncatedBase = baseAltText.substring(0, maxBaseLength - 3) + '...';
         return truncatedBase + imageNumber + brandSuffix;
@@ -292,6 +297,11 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
         console.error('Error generating optimized alt text with Gemini:', error);
         
         // Fallback: manually truncate
+        let baseAltText = productTitle;
+        if (variantInfo) {
+            baseAltText += ` | ${variantInfo}`;
+        }
+        
         const maxBaseLength = maxContentLength;
         let truncatedBase = baseAltText.substring(0, maxBaseLength - 3) + '...';
         return truncatedBase + imageNumber + brandSuffix;
