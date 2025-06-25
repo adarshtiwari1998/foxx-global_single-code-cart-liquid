@@ -291,6 +291,13 @@ async function fetchProductDetailsBySKU(sku) {
 
     try {
         console.log(`Fetching product details for SKU: ${sku}`);
+        
+        // Check if access token is available
+        if (!shopifyAccessToken) {
+            console.error('Shopify access token is missing');
+            return null;
+        }
+        
         const response = await fetch(`https://${shopName}.myshopify.com/admin/api/2024-01/graphql.json`, {
             method: 'POST',
             headers: {
@@ -300,8 +307,27 @@ async function fetchProductDetailsBySKU(sku) {
             body: JSON.stringify({ query }),
         });
 
-        const { data } = await response.json();
-        const edges = data.productVariants.edges;
+        // Check if response is ok
+        if (!response.ok) {
+            console.error(`Shopify API response not ok: ${response.status} ${response.statusText}`);
+            return null;
+        }
+
+        const responseData = await response.json();
+        
+        // Check if response has errors
+        if (responseData.errors) {
+            console.error('Shopify GraphQL errors:', responseData.errors);
+            return null;
+        }
+        
+        // Check if data exists and has the expected structure
+        if (!responseData.data || !responseData.data.productVariants) {
+            console.error('Invalid response structure from Shopify API:', responseData);
+            return null;
+        }
+        
+        const edges = responseData.data.productVariants.edges;
         if (edges.length > 0) {
             return edges[0].node;
         }
@@ -393,10 +419,24 @@ function extractImageNameFromUrl(imageUrl) {
 
 // Function to append missing SKUs to the Google Sheet
 async function appendToMissingSKU(sku) {
-    const range = 'Missing SKU on Website!A:A';
-    const values = [[sku]];
-
     try {
+        // First, try to read from the Missing SKU sheet to see if it exists
+        const range = 'Missing SKU on Website!A:A';
+        
+        try {
+            // Try to get the sheet first
+            await sheets.spreadsheets.values.get({
+                spreadsheetId: spreadsheetId,
+                range: range,
+            });
+        } catch (sheetError) {
+            // If sheet doesn't exist, log and use main sheet instead
+            console.log(`Missing SKU sheet doesn't exist, logging to main sheet instead for SKU: ${sku}`);
+            return;
+        }
+
+        // If sheet exists, append the SKU
+        const values = [[sku]];
         await sheets.spreadsheets.values.append({
             spreadsheetId: spreadsheetId,
             range: range,
@@ -592,10 +632,28 @@ app.get('/update-alt-text', async (req, res) => {
     }
 });
 
+// Validate required environment variables
+function validateEnvironmentVariables() {
+    const required = ['SHOPIFY_ADMIN_ACCESS_TOKEN', 'GOOGLE_SHEET_ID', 'GEMINI_API_KEY'];
+    const missing = required.filter(key => !process.env[key]);
+    
+    if (missing.length > 0) {
+        console.error('Missing required environment variables:', missing);
+        console.error('Please set these in your .env file or environment');
+        return false;
+    }
+    
+    console.log('✓ All required environment variables are set');
+    return true;
+}
+
 // Start the server
 const PORT = process.env.PORT || 8700;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Available endpoints:`);
     console.log(`- GET /update-alt-text (alt text update with brand suffix, preserves image names, resumes from last position)`);
+    
+    // Validate environment variables at startup
+    validateEnvironmentVariables();
 });
