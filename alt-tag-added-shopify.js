@@ -253,18 +253,21 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
         }
     }
     
-    const prompt = `Optimize this product title for SEO while keeping it under ${maxContentLength} characters:
+    const prompt = `Optimize this product title for SEO and accessibility while keeping it under ${maxContentLength} characters:
 
     "${processedTitle}"
     
-    Requirements:
+    SEO Requirements:
     - Maximum ${maxContentLength} characters
     - Keep all brand names (like EZBio®, Foxx, etc.)
     - Keep model numbers and key identifiers
-    - Keep essential product features
-    - Make it concise but complete
+    - Keep essential product features and specifications
+    - Use descriptive keywords that users might search for
+    - Make it concise but informative
+    - Prioritize key product attributes (size, material, capacity, etc.)
     - DO NOT add ellipsis or dots
     - DO NOT add any extra text
+    - Focus on searchable terms and product benefits
     
     Return only the optimized title, nothing else.`;
 
