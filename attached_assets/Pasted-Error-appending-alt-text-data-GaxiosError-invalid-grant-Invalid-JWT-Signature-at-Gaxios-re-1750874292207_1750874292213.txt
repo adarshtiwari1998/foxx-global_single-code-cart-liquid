@@ -1,0 +1,79 @@
+Error appending alt text data: GaxiosError: invalid_grant: Invalid JWT Signature.
+    at Gaxios._request (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\gaxios\build\src\gaxios.js:142:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async GoogleToken._GoogleToken_requestToken (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\gtoken\build\src\index.js:241:19)
+    at async GoogleToken._GoogleToken_getTokenAsync (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\gtoken\build\src\index.js:160:16)
+    at async JWT.refreshTokenNoCache (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\google-auth-library\build\src\auth\jwtclient.js:173:23)
+    at async JWT.getRequestMetadataAsync (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\google-auth-library\build\src\auth\oauth2client.js:333:17)
+    at async JWT.requestAsync (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\google-auth-library\build\src\auth\oauth2client.js:418:23)
+    at async appendAltTextData (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:73:9)
+    at async updateSkuStatus (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:122:9)
+    at async updateAltTextFromSheet (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:681:9) {
+  config: {
+    method: 'POST',
+    url: 'https://www.googleapis.com/oauth2/v4/token',
+    data: {
+      grant_type: '<<REDACTED> - See `errorRedactor` option in `gaxios` for configuration>.',
+      assertion: '<<REDACTED> - See `errorRedactor` option in `gaxios` for configuration>.'
+    },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': 'google-api-nodejs-client/9.15.0',
+      'x-goog-api-client': 'gl-node/20.9.0',
+      Accept: 'application/json'
+    },
+    responseType: 'json',
+    retryConfig: {
+      httpMethodsToRetry: [Array],
+      currentRetryAttempt: 0,
+      retry: 3,
+      noResponseRetries: 2,
+      retryDelayMultiplier: 2,
+      timeOfFirstRequest: 1750874247225,
+      totalTimeout: 9007199254740991,
+      maxRetryDelay: 9007199254740991,
+      statusCodesToRetry: [Array]
+    },
+    paramsSerializer: [Function: paramsSerializer],
+    body: '<<REDACTED> - See `errorRedactor` option in `gaxios` for configuration>.',
+    validateStatus: [Function: validateStatus],
+    errorRedactor: [Function: defaultErrorRedactor]
+  },
+  response: {
+    config: {
+      method: 'POST',
+      url: 'https://www.googleapis.com/oauth2/v4/token',
+      data: [Object],
+      headers: [Object],
+      responseType: 'json',
+      retryConfig: [Object],
+      paramsSerializer: [Function: paramsSerializer],
+      body: '<<REDACTED> - See `errorRedactor` option in `gaxios` for configuration>.',
+      validateStatus: [Function: validateStatus],
+      errorRedactor: [Function: defaultErrorRedactor]
+    },
+    data: {
+      error: 'invalid_grant',
+      error_description: 'Invalid JWT Signature.'
+    },
+    headers: {
+      'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000',
+      'content-encoding': 'gzip',
+      'content-type': 'application/json; charset=UTF-8',
+      date: 'Wed, 25 Jun 2025 17:57:26 GMT',
+      server: 'scaffolding on HTTPServer2',
+      'transfer-encoding': 'chunked',
+      vary: 'Origin, X-Origin, Referer',
+      'x-content-type-options': 'nosniff',
+      'x-frame-options': 'SAMEORIGIN',
+      'x-xss-protection': '0'
+    },
+    status: 400,
+    statusText: 'Bad Request',
+    request: { responseURL: 'https://www.googleapis.com/oauth2/v4/token' }
+  },
+  error: undefined,
+  status: 400,
+  [Symbol(gaxios-gaxios-error)]: '6.7.1'
+}
+Fetching product details for SKU: 25P-2508-OEM
