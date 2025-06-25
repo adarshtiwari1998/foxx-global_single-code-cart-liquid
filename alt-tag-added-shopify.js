@@ -168,6 +168,31 @@ function getVariantInfoForImage(mediaToVariants, mediaId) {
         .filter((title, index, arr) => arr.indexOf(title) === index) // Remove duplicates
         .filter(title => title && title !== 'Default Title'); // Remove empty and default titles
     
+    // If image is shared across many variants (more than 5), use a generic approach
+    if (variantTitles.length > 5) {
+        // Try to find common patterns or categories
+        const hasColors = variantTitles.some(title => 
+            /(red|blue|green|yellow|black|white|clear|transparent)/i.test(title)
+        );
+        const hasSizes = variantTitles.some(title => 
+            /(small|medium|large|xs|s|m|l|xl|\d+ml|\d+L|\d+mm|\d+cm)/i.test(title)
+        );
+        
+        let summary = '';
+        if (hasColors && hasSizes) {
+            summary = 'Multiple Colors & Sizes';
+        } else if (hasColors) {
+            summary = 'Multiple Colors';
+        } else if (hasSizes) {
+            summary = 'Multiple Sizes';
+        } else {
+            summary = `${variantTitles.length} Variants Available`;
+        }
+        
+        return summary;
+    }
+    
+    // For 5 or fewer variants, include them all
     return variantTitles.join(' | ');
 }
 
@@ -190,7 +215,7 @@ function generateImageName(productTitle, variantInfo = '', imageIndex = 1, isSha
 }
 
 // Function to generate alt text using Gemini AI
-async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, maxLength = 140) {
+async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, maxLength = 140, variantCount = 0) {
     // Required components that must always be included
     const imageNumber = ` img_${imageIndex}`;
     const brandSuffix = ' | Foxx Life Sciences Global | shopfls.com';
@@ -215,10 +240,19 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
     // If too long, use Gemini to create a shorter, SEO-friendly version
     const maxContentLength = maxLength - requiredSuffixLength - 5; // Extra buffer
     
+    let variantContext = '';
+    if (variantInfo) {
+        if (variantCount > 5) {
+            variantContext = `This image represents a product with many variants (${variantCount} total). Variant summary: "${variantInfo}"`;
+        } else {
+            variantContext = `Variant details: "${variantInfo}"`;
+        }
+    }
+    
     const prompt = `Create a concise, SEO-friendly alt text for an e-commerce product image.
     
     Product title: "${productTitle}"
-    ${variantInfo ? `Variant details: "${variantInfo}"` : ''}
+    ${variantContext}
     Image number: ${imageIndex}
     
     Requirements:
@@ -228,7 +262,8 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
     - Keep it under ${maxContentLength} characters
     - DO NOT include image number or brand suffix (these will be added automatically)
     - Focus on the core product essence
-    ${variantInfo ? `- Try to include some key variant information if space allows` : ''}
+    ${variantInfo ? `- Include variant information if it fits naturally` : ''}
+    ${variantCount > 5 ? `- This image represents multiple product variants, so keep variant info general` : ''}
     
     Return only the shortened product description, nothing else.`;
 
@@ -257,7 +292,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
             }
             
             // Add variant info if there's space and it wasn't included
-            if (variantInfo && !optimizedContent.includes('|') && (optimizedContent.length + variantInfo.length + 3) <= maxContentLength) {
+            if (variantInfo && !optimizedContent.toLowerCase().includes(variantInfo.toLowerCase().split(' | ')[0].substring(0, 10)) && (optimizedContent.length + variantInfo.length + 3) <= maxContentLength) {
                 optimizedContent += ` | ${variantInfo}`;
             }
             
@@ -619,7 +654,7 @@ async function updateAltTextFromSheet(range) {
             }
 
             // Generate SEO-friendly alt text using Gemini with variant info
-            const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex);
+            const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex, 140, variantsUsingThisImage.length);
 
             console.log(`Generated alt text: "${generatedAltText}"`);
 
