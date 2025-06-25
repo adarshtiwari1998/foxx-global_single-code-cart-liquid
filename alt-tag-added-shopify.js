@@ -285,9 +285,9 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
         console.log('\n=== GEMINI API FULL RESPONSE ===');
         console.log(JSON.stringify(data, null, 2));
 
-        // Check for quota exceeded error
+        // Check for quota exceeded error - use fallback instead of stopping
         if (data.error && data.error.code === 429) {
-            console.log('\n!!! GEMINI API QUOTA EXCEEDED !!!');
+            console.log('\n!!! GEMINI API QUOTA EXCEEDED - USING FALLBACK !!!');
             console.log('Error message:', data.error.message);
             
             // Check if there's retry delay information
@@ -298,8 +298,24 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
                 }
             }
             
-            // Return special indicator for quota exceeded
-            return { quotaExceeded: true, error: data.error };
+            // Use fallback instead of returning quota exceeded indicator
+            console.log('Using fallback alt text generation due to quota limit...');
+            const maxContentLength = 200 - imageNumber.length - brandSuffix.length;
+            let fallbackContent = productTitle;
+            if (variantInfo) {
+                fallbackContent = `${productTitle} - ${variantInfo}`;
+            }
+            if (fallbackContent.length > maxContentLength) {
+                fallbackContent = fallbackContent.substring(0, maxContentLength).trim();
+                const lastSpaceIndex = fallbackContent.lastIndexOf(' ');
+                if (lastSpaceIndex > maxContentLength * 0.8) {
+                    fallbackContent = fallbackContent.substring(0, lastSpaceIndex);
+                }
+            }
+            const fallbackAltText = fallbackContent + imageNumber + brandSuffix;
+            console.log('\n=== QUOTA EXCEEDED FALLBACK ALT TEXT ===');
+            console.log('Fallback alt text:', fallbackAltText);
+            return fallbackAltText;
         }
 
         // Check for other API errors
@@ -725,19 +741,6 @@ async function updateAltTextFromSheet(range) {
 
             // Generate SEO-friendly alt text using Gemini with variant info
             const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex);
-
-            // Check if we hit quota limit
-            if (generatedAltText && typeof generatedAltText === 'object' && generatedAltText.quotaExceeded) {
-                console.log('\n!!! QUOTA EXCEEDED - STOPPING PROCESSING !!!');
-                console.log('Updating sheet with quota exceeded status...');
-                
-                // Update sheet with quota exceeded status
-                await updateSkuStatus(sku, 'Quota Exceeded', 'Quota Exceeded', 'FAILED', 'Gemini API quota exceeded. Please wait 24 hours or upgrade API plan.');
-                
-                // Exit the entire process
-                console.log('Exiting due to quota exceeded...');
-                return;
-            }
 
             console.log(`Generated alt text: "${generatedAltText}"`);
 
