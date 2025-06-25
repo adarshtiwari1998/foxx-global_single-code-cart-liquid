@@ -363,9 +363,12 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
             console.log('Using fallback: original product title');
         }
 
-        // Fallback: use truncated product title
+        // Fallback: use truncated product title with variant info
         const maxContentLength = 200 - imageNumber.length - brandSuffix.length;
         let fallbackContent = productTitle;
+        if (variantInfo) {
+            fallbackContent = `${productTitle} - ${variantInfo}`;
+        }
         if (fallbackContent.length > maxContentLength) {
             fallbackContent = fallbackContent.substring(0, maxContentLength).trim();
             const lastSpaceIndex = fallbackContent.lastIndexOf(' ');
@@ -382,9 +385,12 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
         console.error('\n!!! ERROR GENERATING OPTIMIZED ALT TEXT !!!');
         console.error('Error details:', error);
 
-        // Fallback: use truncated product title
+        // Fallback: use truncated product title with variant info
         const maxContentLength = 200 - imageNumber.length - brandSuffix.length;
         let fallbackContent = productTitle;
+        if (variantInfo) {
+            fallbackContent = `${productTitle} - ${variantInfo}`;
+        }
         if (fallbackContent.length > maxContentLength) {
             fallbackContent = fallbackContent.substring(0, maxContentLength).trim();
             const lastSpaceIndex = fallbackContent.lastIndexOf(' ');
