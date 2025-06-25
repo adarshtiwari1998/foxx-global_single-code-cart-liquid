@@ -1,0 +1,111 @@
+  at async file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:587:9     
+SKU 205-7178-FLS not found in Shopify
+Error appending missing SKU: GaxiosError: Unable to parse range: Missing SKU on Website!A:A
+    at Gaxios._request (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\gaxios\build\src\gaxios.js:142:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async JWT.requestAsync (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\google-auth-library\build\src\auth\oauth2client.js:429:18)
+    at async appendToMissingSKU (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:400:9)
+    at async updateAltTextFromSheet (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:483:13)
+    at async file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:587:9 {   
+  config: {
+    url: 'https://sheets.googleapis.com/v4/spreadsheets/1TGO243r3RKBM3O7nmqlnwvTSPkwRAgZbPeEEtoF1Kdg/values/Missing%20SKU%20on%20Website%21A%3AA:append?valueInputOption=RAW',
+    method: 'POST',
+    userAgentDirectives: [ [Object] ],
+    paramsSerializer: [Function (anonymous)],
+    data: { values: [Array] },
+    headers: {
+      'x-goog-api-client': 'gdcl/7.2.0 gl-node/20.9.0',
+      'Accept-Encoding': 'gzip',
+      'User-Agent': 'google-api-nodejs-client/7.2.0 (gzip)',
+      Authorization: '<<REDACTED> - See `errorRedactor` option in `gaxios` for configuration>.',
+      'Content-Type': 'application/json'
+    },
+    params: { valueInputOption: 'RAW' },
+    validateStatus: [Function (anonymous)],
+    retry: true,
+    body: '{"values":[["205-7178-FLS"]]}',
+    responseType: 'unknown',
+    errorRedactor: [Function: defaultErrorRedactor],
+    retryConfig: {
+      currentRetryAttempt: 0,
+      retry: 3,
+      httpMethodsToRetry: [Array],
+      noResponseRetries: 2,
+      retryDelayMultiplier: 2,
+      timeOfFirstRequest: 1750844416821,
+      totalTimeout: 9007199254740991,
+      maxRetryDelay: 9007199254740991,
+      statusCodesToRetry: [Array]
+    }
+  },
+  response: {
+    config: {
+      url: 'https://sheets.googleapis.com/v4/spreadsheets/1TGO243r3RKBM3O7nmqlnwvTSPkwRAgZbPeEEtoF1Kdg/values/Missing%20SKU%20on%20Website%21A%3AA:append?valueInputOption=RAW',
+      method: 'POST',
+      userAgentDirectives: [Array],
+      paramsSerializer: [Function (anonymous)],
+      data: [Object],
+      headers: [Object],
+      params: [Object],
+      validateStatus: [Function (anonymous)],
+      retry: true,
+      body: '{"values":[["205-7178-FLS"]]}',
+      responseType: 'unknown',
+      errorRedactor: [Function: defaultErrorRedactor]
+    },
+    data: { error: [Object] },
+    headers: {
+      'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000',
+      'content-encoding': 'gzip',
+      'content-type': 'application/json; charset=UTF-8',
+      date: 'Wed, 25 Jun 2025 09:40:16 GMT',
+      server: 'ESF',
+      'transfer-encoding': 'chunked',
+      vary: 'Origin, X-Origin, Referer',
+      'x-content-type-options': 'nosniff',
+      'x-frame-options': 'SAMEORIGIN',
+      'x-l2-request-path': 'l2-managed-6',
+      'x-xss-protection': '0'
+    },
+    status: 400,
+    statusText: 'Bad Request',
+    request: {
+      responseURL: 'https://sheets.googleapis.com/v4/spreadsheets/1TGO243r3RKBM3O7nmqlnwvTSPkwRAgZbPeEEtoF1Kdg/values/Missing%20SKU%20on%20Website%21A%3AA:append?valueInputOption=RAW'     
+    }
+  },
+  error: undefined,
+  status: 400,
+  code: 400,
+  errors: [
+    {
+      message: 'Unable to parse range: Missing SKU on Website!A:A',
+      domain: 'global',
+      reason: 'badRequest'
+    }
+  ],
+  [Symbol(gaxios-gaxios-error)]: '6.7.1'
+}
+Updated existing row for SKU: 205-7178-FLS - Status: FAILED - Remarks: SKU not found in Shopify
+
+--- Processing SKU: 205-7179-FLS (Generating new alt text) ---
+Updated existing row for SKU: 205-7179-FLS - Status: Processing - Remarks: Processing...
+Fetching product details for SKU: 205-7179-FLS
+Error fetching product details: TypeError: Cannot read properties of undefined (reading 'productVariants')
+    at fetchProductDetailsBySKU (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:304:28)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async updateAltTextFromSheet (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:480:32)
+    at async file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:587:9     
+SKU 205-7179-FLS not found in Shopify
+Error appending missing SKU: GaxiosError: Unable to parse range: Missing SKU on Website!A:A
+    at Gaxios._request (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\gaxios\build\src\gaxios.js:142:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async JWT.requestAsync (C:\Users\Adars\OneDrive\Documents\Coding\Foxx_Office_Website_Projects\2024\Master_File_Product_Data_Extraction_foxx_global\node_modules\google-auth-library\build\src\auth\oauth2client.js:429:18)
+    at async appendToMissingSKU (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:400:9)
+    at async updateAltTextFromSheet (file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:483:13)
+    at async file:///C:/Users/Adars/OneDrive/Documents/Coding/Foxx_Office_Website_Projects/2024/Master_File_Product_Data_Extraction_foxx_global/alt-tag-update-shopify-append.mjs:587:9 {   
+  config: {
+    url: 'https://sheets.googleapis.com/v4/spreadsheets/1TGO243r3RKBM3O7nmqlnwvTSPkwRAgZbPeEEtoF1Kdg/values/Missing%20SKU%20on%20Website%21A%3AA:append?valueInputOption=RAW',
+    method: 'POST',
+    userAgentDirectives: [ [Object] ],
+    paramsSerializer: [Function (anonymous)],
+    data: { values: [Ar
