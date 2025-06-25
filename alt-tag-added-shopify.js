@@ -340,7 +340,7 @@ async function updateAltTextFromSheet(range) {
         return;
     }
 
-    const skuIndex = headers.indexOf('skus');
+    const skuIndex = headers.indexOf('sku');
 
     if (skuIndex === -1) {
         console.error('SKU column not found in Google Sheet. Available columns:', headers);
