@@ -253,23 +253,24 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
         }
     }
 
-    const prompt = `Create an SEO-optimized alt text from this product title and variant info, targeting 125-150 characters total including suffixes:
+    const prompt = `Create an SEO-optimized alt text from this product title, targeting 125-150 characters total including suffixes:
 
     Product Title: "${processedTitle}"
     ${variantInfo ? `Variant Info: "${variantInfo}"` : ''}
 
-    Requirements:
-    - Target length: 125-150 characters (including " | img_${imageIndex} | Foxx Life Sciences Global | shopfls.com")
-    - Current content limit: ${maxContentLength} characters for the main description
-    - Keep all brand names (EZBio®, Foxx, VersaCap®, etc.)
-    - Include model numbers and key specifications
-    - Include variant details when provided
-    - Use descriptive, searchable keywords
-    - Make it concise but informative for accessibility and SEO
+    CRITICAL Requirements:
+    - Target: 125-150 characters total (including " | img_${imageIndex} | Foxx Life Sciences Global | shopfls.com")
+    - Available space for description: ${maxContentLength} characters
+    - MUST preserve complete product identity - don't cut off critical details like "Round Carboy", "1/EA", etc.
+    - Keep ALL brand names exactly as written (EZBio®, Foxx, VersaCap®, etc.)
+    - Keep ALL model numbers and specifications (83B, 40L, 50L, etc.)
+    - Include ALL container types and quantities mentioned
+    - If needed, abbreviate common words (System→Sys, Rectangular→Rect) but keep core product info
+    - Prioritize completeness over brevity - better to use full space than cut important details
     - DO NOT add ellipsis or dots
-    - DO NOT add any extra text beyond what's requested
+    - DO NOT add any extra text
 
-    Return only the optimized product description, nothing else.`;
+    Return only the optimized description that fits in ${maxContentLength} characters, nothing else.`;
 
     try {
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
