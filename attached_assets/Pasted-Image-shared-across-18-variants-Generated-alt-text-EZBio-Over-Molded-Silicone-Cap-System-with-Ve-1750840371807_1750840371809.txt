@@ -1,0 +1,59 @@
+Image shared across 18 variants
+Generated alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 1"
+Generated image name: "ezbio_over_molded_silicone_cap_img_1"
+Attempt 1 - Updating media for ID: gid://shopify/MediaImage/33212615590043
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 1
+New name: ezbio_over_molded_silicone_cap_img_1
+GraphQL errors: [
+  {
+    message: "Field 'productMediaUpdate' doesn't exist on type 'Mutation'",
+    locations: [ [Object] ],
+    path: [ 'mutation productMediaUpdate', 'productMediaUpdate' ],
+    extensions: {
+      code: 'undefinedField',
+      typeName: 'Mutation',
+      fieldName: 'productMediaUpdate'
+    }
+  },
+  {
+    message: 'Variable $media is declared by productMediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation productMediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'media' }
+  },
+  {
+    message: 'Variable $productId is declared by productMediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation productMediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'productId' }
+  }
+]
+Retrying...
+Attempt 2 - Updating media for ID: gid://shopify/MediaImage/33212615590043
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 1
+New name: ezbio_over_molded_silicone_cap_img_1
+GraphQL errors: [
+  {
+    message: "Field 'productMediaUpdate' doesn't exist on type 'Mutation'",
+    locations: [ [Object] ],
+    path: [ 'mutation productMediaUpdate', 'productMediaUpdate' ],
+    extensions: {
+      code: 'undefinedField',
+      typeName: 'Mutation',
+      fieldName: 'productMediaUpdate'
+    }
+  },
+  {
+    message: 'Variable $media is declared by productMediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation productMediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'media' }
+  },
+  {
+    message: 'Variable $productId is declared by productMediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation productMediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'productId' }
+  }
+]
+Retrying...
