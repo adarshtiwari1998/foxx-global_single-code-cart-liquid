@@ -411,6 +411,9 @@ async function updateAltTextFromSheet(range) {
         return;
     }
 
+    // Track processed products to avoid duplicate processing
+    const processedProducts = new Set();
+
     for (const row of data) {
         const sku = row[skuIndex];
 
@@ -449,6 +452,16 @@ async function updateAltTextFromSheet(range) {
             await updateSkuStatus(sku, 'N/A', 'N/A', 'FAILED', 'No media found for this product');
             continue;
         }
+
+        // Check if this product has already been processed
+        if (processedProducts.has(product.id)) {
+            console.log(`\n--- SKIPPING SKU: ${sku} (Product ${product.id} already processed) ---`);
+            await updateSkuStatus(sku, 'Already processed with another SKU', 'Already processed with another SKU', 'UPDATED', 'Product images already updated with another variant SKU');
+            continue;
+        }
+
+        // Mark this product as processed
+        processedProducts.add(product.id);
 
         // Analyze image-variant relationships
         const { mediaToVariants } = analyzeImageVariantRelationships(product);
