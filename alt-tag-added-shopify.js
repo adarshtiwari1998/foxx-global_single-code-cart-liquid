@@ -258,11 +258,23 @@ async function appendToMissingSKU(sku) {
 // Main function to update alt text for product images
 async function updateAltTextFromSheet(range) {
     const rows = await readGoogleSheet(range);
+    
+    if (!rows || rows.length === 0) {
+        console.error('No data found in Google Sheet');
+        return;
+    }
+
     const [headers, ...data] = rows;
+    
+    if (!headers || headers.length === 0) {
+        console.error('No headers found in Google Sheet');
+        return;
+    }
+
     const skuIndex = headers.indexOf('skus');
 
     if (skuIndex === -1) {
-        console.error('SKU column not found in Google Sheet');
+        console.error('SKU column not found in Google Sheet. Available columns:', headers);
         return;
     }
 
