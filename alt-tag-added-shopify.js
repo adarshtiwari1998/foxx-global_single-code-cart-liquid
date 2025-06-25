@@ -12,7 +12,7 @@ app.use(cors());
 // Shopify and Google Sheets Setup
 const shopName = 'shopfls';
 const shopifyAccessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
-const spreadsheetId = '1HTtIBjNUa98892nAejYV7NJBVPEu7KtlyzKSlQdeln4';
+const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const geminiTextApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
@@ -63,19 +63,19 @@ async function appendAltTextData(sku, altText, imageName, status) {
 function analyzeImageVariantRelationships(product) {
     const mediaToVariants = new Map();
     const variantToMedia = new Map();
-    
+
     // Map each variant to its media
     product.variants.edges.forEach(variantEdge => {
         const variant = variantEdge.node;
         const variantMediaIds = [];
-        
+
         // In Shopify, we need to check if variant has specific images assigned
         // For now, we'll assume all variants share the same product media
         product.media.edges.forEach(mediaEdge => {
             const media = mediaEdge.node;
             if (media.image) { // Only process images
                 variantMediaIds.push(media.id);
-                
+
                 if (!mediaToVariants.has(media.id)) {
                     mediaToVariants.set(media.id, []);
                 }
@@ -86,10 +86,10 @@ function analyzeImageVariantRelationships(product) {
                 });
             }
         });
-        
+
         variantToMedia.set(variant.id, variantMediaIds);
     });
-    
+
     return { mediaToVariants, variantToMedia };
 }
 
@@ -99,7 +99,7 @@ function generateImageName(productTitle, variantInfo = '', imageIndex = 1, isSha
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, '_')
         .substring(0, 30);
-    
+
     if (isSharedImage || !variantInfo) {
         return `${cleanTitle}_img_${imageIndex}`;
     } else {
@@ -114,7 +114,7 @@ function generateImageName(productTitle, variantInfo = '', imageIndex = 1, isSha
 // Function to generate alt text using Gemini AI
 async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, isSharedImage = false) {
     let prompt;
-    
+
     if (isSharedImage) {
         prompt = `Create an SEO-friendly alt text for an e-commerce product image that is shared across multiple variants.
         Product title: "${productTitle}"
@@ -327,14 +327,14 @@ async function appendToMissingSKU(sku) {
 // Main function to update alt text for product images
 async function updateAltTextFromSheet(range) {
     const rows = await readGoogleSheet(range);
-    
+
     if (!rows || rows.length === 0) {
         console.error('No data found in Google Sheet');
         return;
     }
 
     const [headers, ...data] = rows;
-    
+
     if (!headers || headers.length === 0) {
         console.error('No headers found in Google Sheet');
         return;
@@ -378,7 +378,7 @@ async function updateAltTextFromSheet(range) {
 
         // Analyze image-variant relationships
         const { mediaToVariants } = analyzeImageVariantRelationships(product);
-        
+
         let successCount = 0;
         let failCount = 0;
         let altTextsGenerated = [];
@@ -400,7 +400,7 @@ async function updateAltTextFromSheet(range) {
             // Check if this image is shared across multiple variants
             const variantsUsingThisImage = mediaToVariants.get(media.id) || [];
             const isSharedImage = variantsUsingThisImage.length > 1;
-            
+
             console.log(`Image shared across ${variantsUsingThisImage.length} variants`);
 
             // Determine variant info based on sharing logic
@@ -415,7 +415,7 @@ async function updateAltTextFromSheet(range) {
 
             console.log(`Generated alt text: "${generatedAltText}"`);
             console.log(`Generated image name: "${generatedImageName}"`);
-            
+
             altTextsGenerated.push(generatedAltText);
             imageNamesGenerated.push(generatedImageName);
 
