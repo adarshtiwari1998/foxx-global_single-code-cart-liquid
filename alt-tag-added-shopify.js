@@ -289,7 +289,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
         if (data.error && data.error.code === 429) {
             console.log('\n!!! GEMINI API QUOTA EXCEEDED - USING FALLBACK !!!');
             console.log('Error message:', data.error.message);
-            
+
             // Check if there's retry delay information
             if (data.error.details) {
                 const retryInfo = data.error.details.find(detail => detail['@type'] === 'type.googleapis.com/google.rpc.RetryInfo');
@@ -297,7 +297,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
                     console.log('Suggested retry delay:', retryInfo.retryDelay);
                 }
             }
-            
+
             // Use fallback instead of returning quota exceeded indicator
             console.log('Using fallback alt text generation due to quota limit...');
             const maxContentLength = 200 - imageNumber.length - brandSuffix.length;
