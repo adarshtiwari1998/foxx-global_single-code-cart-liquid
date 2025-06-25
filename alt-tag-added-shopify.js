@@ -243,13 +243,20 @@ async function fetchProductDetailsBySKU(sku) {
 // Function to update media name and alt text in Shopify
 async function updateMediaNameAndAlt(mediaId, altText, imageName, productId, retries = 3) {
     const mutation = `
-        mutation productMediaUpdate($media: [UpdateMediaInput!]!, $productId: ID!) {
-            productMediaUpdate(media: $media, productId: $productId) {
-                media {
+        mutation productUpdate($input: ProductInput!) {
+            productUpdate(input: $input) {
+                product {
                     id
-                    alt
+                    media(first: 50) {
+                        edges {
+                            node {
+                                id
+                                alt
+                            }
+                        }
+                    }
                 }
-                mediaUserErrors {
+                userErrors {
                     field
                     message
                 }
@@ -258,11 +265,13 @@ async function updateMediaNameAndAlt(mediaId, altText, imageName, productId, ret
     `;
 
     const variables = {
-        media: [{
-            id: mediaId,
-            alt: altText
-        }],
-        productId: productId
+        input: {
+            id: productId,
+            media: [{
+                id: mediaId,
+                alt: altText
+            }]
+        }
     };
 
     for (let attempt = 1; attempt <= retries; attempt++) {
@@ -291,8 +300,8 @@ async function updateMediaNameAndAlt(mediaId, altText, imageName, productId, ret
                 continue;
             }
 
-            if (data.productMediaUpdate.mediaUserErrors.length > 0) {
-                console.error('Media update errors:', data.productMediaUpdate.mediaUserErrors);
+            if (data.productUpdate.userErrors.length > 0) {
+                console.error('Media update errors:', data.productUpdate.userErrors);
                 return false;
             }
 
