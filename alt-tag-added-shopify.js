@@ -220,27 +220,40 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
     const imageNumber = ` | img_${imageIndex}`;
     const brandSuffix = ' | Foxx Life Sciences Global | shopfls.com';
 
-    const prompt = `Create a comprehensive, SEO-friendly alt text for this product image. Make it detailed, descriptive, and optimized for search engines and accessibility:
+    const prompt = `Transform this product title into a compelling, SEO-optimized, and descriptive alt text that would rank well in search engines and appeal to customers:
 
-    Product Title: "${productTitle}"
-    ${variantInfo ? `Variant Information: "${variantInfo}"` : ''}
+    Original Product: "${productTitle}"
+    ${variantInfo ? `Variant Details: "${variantInfo}"` : ''}
 
-    SEO & Accessibility Requirements:
-    - Create a complete, detailed description of the product
-    - Include ALL brand names exactly as written (EZBio®, Foxx, VersaCap®, etc.)
-    - Include ALL model numbers, specifications, and technical details
-    - Include ALL size/capacity information (40L, 50L, etc.)
-    - Include ALL material descriptions and product features
-    - Include variant information when provided
-    - Use descriptive, searchable keywords that potential customers would use
-    - Make it informative for screen readers and visually impaired users
-    - Optimize for search engine discoverability
-    - Be comprehensive and complete - don't cut off any important details
-    - Focus on product benefits and key selling points
-    - DO NOT add ellipsis, dots, or truncate any information
-    - DO NOT add any extra text beyond the product description
-
-    Create the most comprehensive, SEO-optimized alt text possible. Return only the product description, nothing else.`;
+    Create an enhanced, SEO-friendly description that:
+    
+    MUST INCLUDE (preserve exactly):
+    - All brand names: EZBio®, Foxx, VersaCap®, etc.
+    - All model numbers: 83B, etc.
+    - All specifications: 40L, 50L, capacities, dimensions
+    - All technical details and materials
+    
+    ENHANCE WITH:
+    - Descriptive adjectives (premium, professional, laboratory-grade, etc.)
+    - Product benefits (leak-proof, sterile, durable, etc.)
+    - Usage context (laboratory equipment, bioprocessing, research, etc.)
+    - Material qualities (silicone flexibility, chemical resistance, etc.)
+    - Professional terminology that customers search for
+    - Clear product category identification
+    
+    WRITE STYLE:
+    - Professional yet accessible language
+    - Rich descriptive keywords for SEO
+    - Complete sentences that flow naturally
+    - Include searchable terms customers would use
+    - Make it informative and compelling
+    - Perfect for screen readers and search engines
+    
+    Example transformation:
+    Instead of: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA"
+    Create: "Professional EZBio® Over-Molded Silicone Cap System featuring VersaCap® 83B Technology for 40L Rectangular and 50L Round Laboratory Carboys - Premium Leak-Proof Bioprocessing Equipment for Research and Industrial Applications, Single Unit"
+    
+    Transform the product title into a rich, SEO-optimized description. Return only the enhanced description, nothing else.`;
 
     try {
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
