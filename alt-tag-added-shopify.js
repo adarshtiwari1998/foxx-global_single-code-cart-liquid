@@ -187,7 +187,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, i
         Requirements:
         - Use only the product title (no variant-specific details)
         - Make it descriptive and SEO-friendly
-        - Keep it under 125 characters
+        - Keep it under 95 characters (to allow space for brand suffix)
         - Make it natural and readable
         - Focus on the main product features
 
@@ -201,7 +201,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, i
         Requirements:
         - Include both product name and variant details
         - Make it descriptive and SEO-friendly
-        - Keep it under 125 characters
+        - Keep it under 95 characters (to allow space for brand suffix)
         - Make it natural and readable
         - Focus on variant-specific features
 
@@ -225,12 +225,16 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, i
 
         const data = await response.json();
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            return data.candidates[0].content.parts[0].text.trim();
+            const baseAltText = data.candidates[0].content.parts[0].text.trim();
+            // Add brand suffix to all alt texts
+            return `${baseAltText} | Foxx Life Sciences Global shopfls.com`;
         }
-        return `${productTitle} ${variantInfo} img ${imageIndex}`.trim();
+        const fallbackAltText = `${productTitle} ${variantInfo} img ${imageIndex}`.trim();
+        return `${fallbackAltText} | Foxx Life Sciences Global shopfls.com`;
     } catch (error) {
         console.error('Error generating alt text with Gemini:', error);
-        return `${productTitle} ${variantInfo} img ${imageIndex}`.trim();
+        const fallbackAltText = `${productTitle} ${variantInfo} img ${imageIndex}`.trim();
+        return `${fallbackAltText} | Foxx Life Sciences Global shopfls.com`;
     }
 }
 
@@ -261,6 +265,10 @@ async function fetchProductDetailsBySKU(sku) {
                                             sources {
                                                 url
                                             }
+                                        }
+                                        ... on GenericFile {
+                                            originalFileSize
+                                            url
                                         }
                                     }
                                 }
@@ -304,8 +312,8 @@ async function fetchProductDetailsBySKU(sku) {
     }
 }
 
-// Function to update media name and alt text in Shopify
-async function updateMediaNameAndAlt(mediaId, altText, imageName, productId, retries = 3) {
+// Function to update only alt text in Shopify (skip name updates)
+async function updateMediaAltText(mediaId, altText, retries = 3) {
     const mutation = `
         mutation fileUpdate($files: [FileUpdateInput!]!) {
             fileUpdate(files: $files) {
@@ -330,9 +338,8 @@ async function updateMediaNameAndAlt(mediaId, altText, imageName, productId, ret
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            console.log(`Attempt ${attempt} - Updating media for ID: ${mediaId}`);
+            console.log(`Attempt ${attempt} - Updating alt text for media ID: ${mediaId}`);
             console.log(`New alt text: ${altText}`);
-            console.log(`New name: ${imageName}`);
 
             const response = await fetch(`https://${shopName}.myshopify.com/admin/api/2024-01/graphql.json`, {
                 method: 'POST',
@@ -359,13 +366,29 @@ async function updateMediaNameAndAlt(mediaId, altText, imageName, productId, ret
                 return false;
             }
 
-            console.log(`Successfully updated media ${mediaId}`);
+            console.log(`Successfully updated alt text for media ${mediaId}`);
             return true;
         } catch (error) {
             console.error(`Error during attempt ${attempt} updating media ${mediaId}:`, error);
         }
     }
     return false;
+}
+
+// Function to extract image name from URL
+function extractImageNameFromUrl(imageUrl) {
+    try {
+        const url = new URL(imageUrl);
+        const pathname = url.pathname;
+        const fileName = pathname.split('/').pop();
+        // Remove query parameters and file extension for cleaner name
+        const nameWithoutParams = fileName.split('?')[0];
+        const nameWithoutExt = nameWithoutParams.split('.')[0];
+        return nameWithoutExt || 'unnamed_image';
+    } catch (error) {
+        console.error('Error extracting image name from URL:', error);
+        return 'unnamed_image';
+    }
 }
 
 // Function to append missing SKUs to the Google Sheet
@@ -422,12 +445,8 @@ async function updateAltTextFromSheet(range) {
             continue;
         }
 
-        // Check if SKU is already processed
-        const alreadyProcessed = await isSkuAlreadyProcessed(sku);
-        if (alreadyProcessed) {
-            console.log(`\n--- SKIPPING SKU: ${sku} (Already processed) ---`);
-            continue;
-        }
+        // Always process SKUs to regenerate SEO-friendly alt text
+        console.log(`\n--- Processing SKU: ${sku} (Regenerating alt text) ---`);
 
         console.log(`\n--- Processing SKU: ${sku} ---`);
 
@@ -469,7 +488,7 @@ async function updateAltTextFromSheet(range) {
         let successCount = 0;
         let failCount = 0;
         let altTextsGenerated = [];
-        let imageNamesGenerated = [];
+        let existingImageNames = [];
 
         for (let i = 0; i < mediaEdges.length; i++) {
             const media = mediaEdges[i].node;
@@ -484,6 +503,11 @@ async function updateAltTextFromSheet(range) {
             console.log(`Processing image ${imageIndex} for SKU: ${sku}`);
             console.log(`Current alt text: "${media.alt || 'Empty'}"`);
 
+            // Extract existing image name from URL
+            const existingImageName = extractImageNameFromUrl(media.image.url);
+            console.log(`Existing image name: "${existingImageName}"`);
+            existingImageNames.push(existingImageName);
+
             // Check if this image is shared across multiple variants
             const variantsUsingThisImage = mediaToVariants.get(media.id) || [];
             const isSharedImage = variantsUsingThisImage.length > 1;
@@ -496,25 +520,22 @@ async function updateAltTextFromSheet(range) {
                 variantInfo = variantTitle;
             }
 
-            // Generate SEO-friendly alt text and name using Gemini
+            // Generate SEO-friendly alt text using Gemini (always regenerate)
             const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex, isSharedImage);
-            const generatedImageName = generateImageName(productTitle, variantInfo, imageIndex, isSharedImage);
 
             console.log(`Generated alt text: "${generatedAltText}"`);
-            console.log(`Generated image name: "${generatedImageName}"`);
 
             altTextsGenerated.push(generatedAltText);
-            imageNamesGenerated.push(generatedImageName);
 
-            // Update both name and alt text in Shopify
-            const updateSuccess = await updateMediaNameAndAlt(media.id, generatedAltText, generatedImageName, product.id);
+            // Update only alt text in Shopify (skip name updates)
+            const updateSuccess = await updateMediaAltText(media.id, generatedAltText);
 
             if (updateSuccess) {
                 successCount++;
-                console.log(`✓ Successfully updated image ${imageIndex}`);
+                console.log(`✓ Successfully updated alt text for image ${imageIndex}`);
             } else {
                 failCount++;
-                console.log(`✗ Failed to update image ${imageIndex}`);
+                console.log(`✗ Failed to update alt text for image ${imageIndex}`);
             }
 
             // Rate limiting
@@ -523,9 +544,9 @@ async function updateAltTextFromSheet(range) {
 
         // Record the results in Google Sheets
         const status = failCount === 0 ? 'UPDATED' : 'FAILED';
-        const remarks = failCount === 0 ? `All ${successCount} images updated` : `${successCount} success, ${failCount} failed`;
+        const remarks = failCount === 0 ? `All ${successCount} alt texts updated` : `${successCount} success, ${failCount} failed`;
         const combinedAltTexts = altTextsGenerated.join(' | ');
-        const combinedImageNames = imageNamesGenerated.join(' | ');
+        const combinedImageNames = existingImageNames.join(' | ');
         await updateSkuStatus(sku, combinedAltTexts, combinedImageNames, status, remarks);
 
         console.log(`--- Completed SKU: ${sku} (${successCount}/${successCount + failCount} images updated) ---\n`);
@@ -535,12 +556,12 @@ async function updateAltTextFromSheet(range) {
     }
 }
 
-// Endpoint to trigger the alt text and name update process
+// Endpoint to trigger the alt text update process (names preserved)
 app.get('/update-alt-text', async (req, res) => {
     const range = 'Sheet1!A:A'; // Only need SKU column for processing
     try {
         await updateAltTextFromSheet(range);
-        res.send('Alt text updated successfully');
+        res.send('Alt text updated successfully with brand suffix');
     } catch (error) {
         console.error('Error while updating alt text:', error);
         res.status(500).send('Error updating alt text');
@@ -552,5 +573,5 @@ const PORT = process.env.PORT || 8700;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Available endpoints:`);
-    console.log(`- GET /update-alt-text (alt text and image name update)`);
+    console.log(`- GET /update-alt-text (alt text update with brand suffix, preserves image names)`);
 });
