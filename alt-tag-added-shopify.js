@@ -437,6 +437,27 @@ async function updateAltTextFromSheet(range) {
     // Track processed products to avoid duplicate processing
     const processedProducts = new Set();
 
+    // Check the status sheet to see which SKUs already have alt text
+    const statusRows = await readGoogleSheet('Sheet1!A:E');
+    const processedSKUs = new Set();
+    
+    if (statusRows && statusRows.length > 1) {
+        // Skip header row
+        for (let i = 1; i < statusRows.length; i++) {
+            const statusRow = statusRows[i];
+            const processedSku = statusRow[0]; // SKU column
+            const altText = statusRow[1]; // Alt text column
+            const status = statusRow[3]; // Status column
+            
+            // If SKU has alt text filled and status is UPDATED, mark as already processed
+            if (processedSku && altText && altText !== 'Processing...' && altText !== 'N/A' && status === 'UPDATED') {
+                processedSKUs.add(processedSku);
+            }
+        }
+    }
+
+    console.log(`Found ${processedSKUs.size} already processed SKUs, will skip these.`);
+
     for (const row of data) {
         const sku = row[skuIndex];
 
@@ -445,10 +466,13 @@ async function updateAltTextFromSheet(range) {
             continue;
         }
 
-        // Always process SKUs to regenerate SEO-friendly alt text
-        console.log(`\n--- Processing SKU: ${sku} (Regenerating alt text) ---`);
+        // Check if this SKU is already processed
+        if (processedSKUs.has(sku)) {
+            console.log(`\n--- SKIPPING SKU: ${sku} (Already has alt text in sheet) ---`);
+            continue;
+        }
 
-        console.log(`\n--- Processing SKU: ${sku} ---`);
+        console.log(`\n--- Processing SKU: ${sku} (Generating new alt text) ---`);
 
         // Update sheet with "Processing" status
         await updateSkuStatus(sku, 'Processing...', 'Processing...', 'Processing', 'Processing...');
@@ -556,12 +580,12 @@ async function updateAltTextFromSheet(range) {
     }
 }
 
-// Endpoint to trigger the alt text update process (names preserved)
+// Endpoint to trigger the alt text update process (names preserved, resumes from where it left off)
 app.get('/update-alt-text', async (req, res) => {
     const range = 'Sheet1!A:A'; // Only need SKU column for processing
     try {
         await updateAltTextFromSheet(range);
-        res.send('Alt text updated successfully with brand suffix');
+        res.send('Alt text updated successfully with brand suffix - resumed from last processed SKU');
     } catch (error) {
         console.error('Error while updating alt text:', error);
         res.status(500).send('Error updating alt text');
@@ -573,5 +597,5 @@ const PORT = process.env.PORT || 8700;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Available endpoints:`);
-    console.log(`- GET /update-alt-text (alt text update with brand suffix, preserves image names)`);
+    console.log(`- GET /update-alt-text (alt text update with brand suffix, preserves image names, resumes from last position)`);
 });
