@@ -1,0 +1,52 @@
+--- Processing SKU: 205-7126-FLS (Generating new alt text) ---
+Updated existing row for SKU: 205-7126-FLS - Status: Processing - Remarks: Processing...
+Fetching product details for SKU: 205-7126-FLS
+Processing image 1 for SKU: 205-7126-FLS
+Current alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 20L Round Carboy 1/EA  img 1 | Foxx Life Sciences Global | shopfls.com"
+Existing image name: "83B_Port_2_port-808-1024_img-1"
+Image assigned to 18 variants
+Variant info for this image: "2x1/4" / Non-Sterile | 2x3/8" / Non-Sterile | 2x1/2" / Non-Sterile | 2x1/4", 1x3/8" / Non-Sterile | 2x1/2", 1x3/8" / Non-Sterile | 3x 1/4" / Non-Sterile | 3x 3/8" / Non-Sterile | 4x1/4" / Non-Sterile | 4x3/8" / Non-Sterile | 2x1/4" / Sterile | 2x3/8" / Sterile | 2x1/2" / Sterile | 2x1/4", 1x3/8" / Sterile | 2x1/2", 1x3/8" / Sterile | 3x 1/4" / Sterile | 3x 3/8" / Sterile | 4x1/4" / Sterile | 4x3/8" / Sterile"
+Generated alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Ro... | Foxx Life Sciences Global | shopfls.com"
+Attempt 1 - Updating alt text for media ID: gid://shopify/MediaImage/33212615590043
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Ro... | Foxx Life Sciences Global | shopfls.com
+Successfully updated alt text for media gid://shopify/MediaImage/33212615590043
+✓ Successfully updated alt text for image 1
+Processing image 2 for SKU: 205-7126-FLS
+Current alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 20L Round Carboy 1/EA  img 2 | Foxx Life Sciences Global | shopfls.com"
+Existing image name: "83B_Port_3_port-808-1024_img-2"
+Image assigned to 18 variants
+Variant info for this image: "2x1/4" / Non-Sterile | 2x3/8" / Non-Sterile | 2x1/2" / Non-Sterile | 2x1/4", 1x3/8" / Non-Sterile | 2x1/2", 1x3/8" / Non-Sterile | 3x 1/4" / Non-Sterile | 3x 3/8" / Non-Sterile | 4x1/4" / Non-Sterile | 4x3/8" / Non-Sterile | 2x1/4" / Sterile | 2x3/8" / Sterile | 2x1/2" / Sterile | 2x1/4", 1x3/8" / Sterile | 2x1/2", 1x3/8" / Sterile | 3x 1/4" / Sterile | 3x 3/8" / Sterile | 4x1/4" / Sterile | 4x3/8" / Sterile"
+Generated alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Ro... | Foxx Life Sciences Global | shopfls.com"
+Attempt 1 - Updating alt text for media ID: gid://shopify/MediaImage/33212615557275
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Ro... | Foxx Life Sciences Global | shopfls.com
+Successfully updated alt text for media gid://shopify/MediaImage/33212615557275
+✓ Successfully updated alt text for image 2
+Processing image 3 for SKU: 205-7126-FLS
+Current alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 20L Round Carboy 1/EA  img 3 | Foxx Life Sciences Global | shopfls.com"
+Existing image name: "83B_Port_4_port-808-1024_img-3"
+Image assigned to 18 variants
+Variant info for this image: "2x1/4" / Non-Sterile | 2x3/8" / Non-Sterile | 2x1/2" / Non-Sterile | 2x1/4", 1x3/8" / Non-Sterile | 2x1/2", 1x3/8" / Non-Sterile | 3x 1/4" / Non-Sterile | 3x 3/8" / Non-Sterile | 4x1/4" / Non-Sterile | 4x3/8" / Non-Sterile | 2x1/4" / Sterile | 2x3/8" / Sterile | 2x1/2" / Sterile | 2x1/4", 1x3/8" / Sterile | 2x1/2", 1x3/8" / Sterile | 3x 1/4" / Sterile | 3x 3/8" / Sterile | 4x1/4" / Sterile | 4x3/8" / Sterile"
+Generated alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Ro... | Foxx Life Sciences Global | shopfls.com"
+Attempt 1 - Updating alt text for media ID: gid://shopify/MediaImage/33212615491739
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Ro... | Foxx Life Sciences Global | shopfls.com
+Successfully updated alt text for media gid://shopify/MediaImage/33212615491739
+✓ Successfully updated alt text for image 3
+Updated existing row for SKU: 205-7126-FLS - Status: UPDATED - Remarks: All 3 alt texts updated
+--- Completed SKU: 205-7126-FLS (3/3 images updated) ---
+
+
+--- Processing SKU: 205-7127-FLS (Generating new alt text) ---
+Updated existing row for SKU: 205-7127-FLS - Status: Processing - Remarks: Processing...
+Fetching product details for SKU: 205-7127-FLS
+
+--- SKIPPING SKU: 205-7127-FLS (Product gid://shopify/Product/8490608197787 already processed) ---
+Updated existing row for SKU: 205-7127-FLS - Status: UPDATED - Remarks: Product images already updated with another variant SKU
+
+--- Processing SKU: 205-7128-FLS (Generating new alt text) ---
+Updated existing row for SKU: 205-7128-FLS - Status: Processing - Remarks: Processing...
+Fetching product details for SKU: 205-7128-FLS
+
+--- SKIPPING SKU: 205-7128-FLS (Product gid://shopify/Product/8490608197787 already processed) ---
+Updated existing row for SKU: 205-7128-FLS - Status: UPDATED - Remarks: Product images already updated with another variant SKU
+
+--- Processing SKU: 205-7156-FLS (Generating new alt text) ---
