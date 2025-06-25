@@ -285,6 +285,30 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
         console.log('\n=== GEMINI API FULL RESPONSE ===');
         console.log(JSON.stringify(data, null, 2));
 
+        // Check for quota exceeded error
+        if (data.error && data.error.code === 429) {
+            console.log('\n!!! GEMINI API QUOTA EXCEEDED !!!');
+            console.log('Error message:', data.error.message);
+            
+            // Check if there's retry delay information
+            if (data.error.details) {
+                const retryInfo = data.error.details.find(detail => detail['@type'] === 'type.googleapis.com/google.rpc.RetryInfo');
+                if (retryInfo && retryInfo.retryDelay) {
+                    console.log('Suggested retry delay:', retryInfo.retryDelay);
+                }
+            }
+            
+            // Return special indicator for quota exceeded
+            return { quotaExceeded: true, error: data.error };
+        }
+
+        // Check for other API errors
+        if (data.error) {
+            console.log('\n!!! GEMINI API ERROR !!!');
+            console.log('Error:', data.error);
+            throw new Error(`Gemini API Error: ${data.error.message}`);
+        }
+
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
             let optimizedContent = data.candidates[0].content.parts[0].text.trim();
 
@@ -701,6 +725,19 @@ async function updateAltTextFromSheet(range) {
 
             // Generate SEO-friendly alt text using Gemini with variant info
             const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex);
+
+            // Check if we hit quota limit
+            if (generatedAltText && typeof generatedAltText === 'object' && generatedAltText.quotaExceeded) {
+                console.log('\n!!! QUOTA EXCEEDED - STOPPING PROCESSING !!!');
+                console.log('Updating sheet with quota exceeded status...');
+                
+                // Update sheet with quota exceeded status
+                await updateSkuStatus(sku, 'Quota Exceeded', 'Quota Exceeded', 'FAILED', 'Gemini API quota exceeded. Please wait 24 hours or upgrade API plan.');
+                
+                // Exit the entire process
+                console.log('Exiting due to quota exceeded...');
+                return;
+            }
 
             console.log(`Generated alt text: "${generatedAltText}"`);
 
