@@ -47,9 +47,9 @@ async function isSkuAlreadyProcessed(sku) {
             spreadsheetId: spreadsheetId,
             range: range,
         });
-        
+
         const values = response.data.values || [];
-        
+
         // Skip header row and check if SKU exists with UPDATED status
         for (let i = 1; i < values.length; i++) {
             const row = values[i];
@@ -92,9 +92,9 @@ async function updateSkuStatus(sku, altText, imageName, status, remarks) {
             spreadsheetId: spreadsheetId,
             range: range,
         });
-        
+
         const values = response.data.values || [];
-        
+
         // Find the row with the SKU
         for (let i = 1; i < values.length; i++) {
             const row = values[i];
@@ -113,7 +113,7 @@ async function updateSkuStatus(sku, altText, imageName, status, remarks) {
                 return;
             }
         }
-        
+
         // If SKU not found, append new row
         await appendAltTextData(sku, altText, imageName, status, remarks);
     } catch (error) {
