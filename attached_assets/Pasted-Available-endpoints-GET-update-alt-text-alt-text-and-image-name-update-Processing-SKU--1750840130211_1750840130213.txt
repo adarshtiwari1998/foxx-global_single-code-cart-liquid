@@ -1,0 +1,125 @@
+Available endpoints:
+- GET /update-alt-text (alt text and image name update)
+
+--- Processing SKU: 205-7126-FLS ---
+Fetching product details for SKU: 205-7126-FLS
+Processing image 1 for SKU: 205-7126-FLS
+Current alt text: "Empty"
+Image shared across 18 variants
+Generated alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 1"
+Generated image name: "ezbio_over_molded_silicone_cap_img_1"
+Attempt 1 - Updating media for ID: gid://shopify/MediaImage/33212615590043
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 1
+New name: ezbio_over_molded_silicone_cap_img_1
+GraphQL errors: [
+  {
+    message: "Field 'mediaUpdate' doesn't exist on type 'Mutation'",
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate', 'mediaUpdate' ],
+    extensions: {
+      code: 'undefinedField',
+      typeName: 'Mutation',
+      fieldName: 'mediaUpdate'
+    }
+  },
+  {
+    message: 'Variable $media is declared by mediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'media' }
+  }
+]
+Retrying...
+Attempt 2 - Updating media for ID: gid://shopify/MediaImage/33212615590043
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 1
+New name: ezbio_over_molded_silicone_cap_img_1
+GraphQL errors: [
+  {
+    message: "Field 'mediaUpdate' doesn't exist on type 'Mutation'",
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate', 'mediaUpdate' ],
+    extensions: {
+      code: 'undefinedField',
+      typeName: 'Mutation',
+      fieldName: 'mediaUpdate'
+    }
+  },
+  {
+    message: 'Variable $media is declared by mediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'media' }
+  }
+]
+Retrying...
+Attempt 3 - Updating media for ID: gid://shopify/MediaImage/33212615590043
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 1
+New name: ezbio_over_molded_silicone_cap_img_1
+GraphQL errors: [
+  {
+    message: "Field 'mediaUpdate' doesn't exist on type 'Mutation'",
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate', 'mediaUpdate' ],
+    extensions: {
+      code: 'undefinedField',
+      typeName: 'Mutation',
+      fieldName: 'mediaUpdate'
+    }
+  },
+  {
+    message: 'Variable $media is declared by mediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'media' }
+  }
+]
+✗ Failed to update image 1
+Processing image 2 for SKU: 205-7126-FLS
+Current alt text: "Empty"
+Image shared across 18 variants
+Generated alt text: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 2"
+Generated image name: "ezbio_over_molded_silicone_cap_img_2"
+Attempt 1 - Updating media for ID: gid://shopify/MediaImage/33212615557275
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 2
+New name: ezbio_over_molded_silicone_cap_img_2
+GraphQL errors: [
+  {
+    message: "Field 'mediaUpdate' doesn't exist on type 'Mutation'",
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate', 'mediaUpdate' ],
+    extensions: {
+      code: 'undefinedField',
+      typeName: 'Mutation',
+      fieldName: 'mediaUpdate'
+    }
+  },
+  {
+    message: 'Variable $media is declared by mediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'media' }
+  }
+]
+Retrying...
+Attempt 2 - Updating media for ID: gid://shopify/MediaImage/33212615557275
+New alt text: EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA  img 2
+New name: ezbio_over_molded_silicone_cap_img_2
+GraphQL errors: [
+  {
+    message: "Field 'mediaUpdate' doesn't exist on type 'Mutation'",
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate', 'mediaUpdate' ],
+    extensions: {
+      code: 'undefinedField',
+      typeName: 'Mutation',
+      fieldName: 'mediaUpdate'
+    }
+  },
+  {
+    message: 'Variable $media is declared by mediaUpdate but not used',
+    locations: [ [Object] ],
+    path: [ 'mutation mediaUpdate' ],
+    extensions: { code: 'variableNotUsed', variableName: 'media' }
+  }
+]
+Retrying...
