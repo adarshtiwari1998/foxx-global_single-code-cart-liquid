@@ -215,41 +215,40 @@ function generateImageName(productTitle, variantInfo = '', imageIndex = 1, isSha
 }
 
 // Function to generate alt text using Gemini AI
-async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, maxLength = 140, variantCount = 0) {
+async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, maxLength = 125, variantCount = 0) {
     // Required components that must always be included
-    const imageNumber = ` img_${imageIndex}`;
+    const imageNumber = ` | img_${imageIndex}`;
     const brandSuffix = ' | Foxx Life Sciences Global | shopfls.com';
     const requiredSuffixLength = imageNumber.length + brandSuffix.length;
     
-    // Always use Gemini to create optimized, SEO-friendly alt text
-    const maxContentLength = maxLength - requiredSuffixLength - 5; // Extra buffer
+    // Calculate max content length with stricter limits
+    const maxContentLength = maxLength - requiredSuffixLength - 10; // More buffer for safety
     
-    let variantContext = '';
-    if (variantInfo) {
-        if (variantCount > 5) {
-            variantContext = `This image represents a product with many variants (${variantCount} total). Variant summary: "${variantInfo}"`;
-        } else {
-            variantContext = `Variant details: "${variantInfo}"`;
-        }
+    // For very long product titles, create a short version first
+    let shortProductTitle = productTitle;
+    if (productTitle.length > 40) {
+        // Extract key product identifiers and features
+        const words = productTitle.split(' ');
+        const importantWords = words.filter(word => 
+            word.length > 2 && 
+            !['with', 'for', 'and', 'the', 'of', 'in', 'on', 'at'].includes(word.toLowerCase())
+        ).slice(0, 6); // Take first 6 important words
+        shortProductTitle = importantWords.join(' ');
     }
     
-    const prompt = `Create a concise, SEO-friendly alt text for an e-commerce product image.
-    
-    Product title: "${productTitle}"
-    ${variantContext}
-    Image number: ${imageIndex}
+    const prompt = `Shorten this product title to under ${Math.min(maxContentLength, 50)} characters while keeping the most important product features:
+
+    "${shortProductTitle}"
     
     Requirements:
-    - Create a shortened version of the product title
-    - Keep the most important product features and keywords
-    - Make it descriptive and SEO-friendly
-    - Keep it under ${maxContentLength} characters
-    - DO NOT include image number or brand suffix (these will be added automatically)
-    - Focus on the core product essence
-    ${variantInfo ? `- Include variant information if it fits naturally` : ''}
-    ${variantCount > 5 ? `- This image represents multiple product variants, so keep variant info general` : ''}
+    - Maximum ${Math.min(maxContentLength, 50)} characters
+    - Keep brand names and model numbers if present
+    - Keep key product features
+    - Remove unnecessary words like "for", "with", "and"
+    - Make it concise but descriptive
+    - DO NOT add anything extra
     
-    Return only the shortened product description, nothing else.`;
+    Return only the shortened title, nothing else.`;
 
     try {
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
@@ -270,41 +269,35 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
             let optimizedContent = data.candidates[0].content.parts[0].text.trim();
             
-            // Ensure it's not too long
+            // Remove quotes if Gemini added them
+            optimizedContent = optimizedContent.replace(/^["']|["']$/g, '');
+            
+            // Ensure it's not too long - be very strict
             if (optimizedContent.length > maxContentLength) {
                 optimizedContent = optimizedContent.substring(0, maxContentLength - 3) + '...';
             }
             
-            // Add variant info if there's space and it wasn't included
-            if (variantInfo && !optimizedContent.toLowerCase().includes(variantInfo.toLowerCase().split(' | ')[0].substring(0, 10)) && (optimizedContent.length + variantInfo.length + 3) <= maxContentLength) {
-                optimizedContent += ` | ${variantInfo}`;
+            // Final length check before adding suffixes
+            const finalText = optimizedContent + imageNumber + brandSuffix;
+            if (finalText.length > maxLength) {
+                // If still too long, cut more from the content
+                const excessLength = finalText.length - maxLength;
+                optimizedContent = optimizedContent.substring(0, optimizedContent.length - excessLength - 3) + '...';
             }
             
             return optimizedContent + imageNumber + brandSuffix;
         }
         
-        // Fallback: manually truncate if Gemini fails
-        let baseAltText = productTitle;
-        if (variantInfo) {
-            baseAltText += ` | ${variantInfo}`;
-        }
-        
-        const maxBaseLength = maxContentLength;
-        let truncatedBase = baseAltText.substring(0, maxBaseLength - 3) + '...';
-        return truncatedBase + imageNumber + brandSuffix;
+        // Fallback: create very short version manually
+        let baseAltText = shortProductTitle.substring(0, maxContentLength - 3) + '...';
+        return baseAltText + imageNumber + brandSuffix;
         
     } catch (error) {
         console.error('Error generating optimized alt text with Gemini:', error);
         
-        // Fallback: manually truncate
-        let baseAltText = productTitle;
-        if (variantInfo) {
-            baseAltText += ` | ${variantInfo}`;
-        }
-        
-        const maxBaseLength = maxContentLength;
-        let truncatedBase = baseAltText.substring(0, maxBaseLength - 3) + '...';
-        return truncatedBase + imageNumber + brandSuffix;
+        // Fallback: create very short version manually
+        let baseAltText = shortProductTitle.substring(0, maxContentLength - 3) + '...';
+        return baseAltText + imageNumber + brandSuffix;
     }
 }
 
