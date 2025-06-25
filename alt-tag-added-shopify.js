@@ -256,42 +256,80 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
     Transform the product title into a rich, SEO-optimized description. Return only the enhanced description, nothing else.`;
 
     try {
+        console.log('\n=== GEMINI API REQUEST ===');
+        console.log('Product Title:', productTitle);
+        console.log('Variant Info:', variantInfo);
+        console.log('Image Index:', imageIndex);
+        console.log('Prompt being sent to Gemini:');
+        console.log('---START PROMPT---');
+        console.log(prompt);
+        console.log('---END PROMPT---');
+
+        const requestBody = {
+            contents: [{
+                parts: [{
+                    text: prompt
+                }]
+            }]
+        };
+
+        console.log('\nSending request to Gemini API...');
+        
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
-            }),
+            body: JSON.stringify(requestBody),
         });
 
+        console.log('Gemini API Response Status:', response.status, response.statusText);
+        
         const data = await response.json();
+        
+        console.log('\n=== GEMINI API FULL RESPONSE ===');
+        console.log(JSON.stringify(data, null, 2));
+        
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
             let optimizedContent = data.candidates[0].content.parts[0].text.trim();
+            
+            console.log('\n=== GEMINI GENERATED CONTENT ===');
+            console.log('Raw Gemini Output:', optimizedContent);
 
             // Remove quotes if Gemini added them
             optimizedContent = optimizedContent.replace(/^["']|["']$/g, '');
+            console.log('After removing quotes:', optimizedContent);
 
             // Remove any ellipsis that Gemini might have added
             optimizedContent = optimizedContent.replace(/\.\.\.$/g, '');
+            console.log('After removing ellipsis:', optimizedContent);
 
-            // Return the complete alt text with no character limits
-            return optimizedContent + imageNumber + brandSuffix;
+            const finalAltText = optimizedContent + imageNumber + brandSuffix;
+            console.log('\n=== FINAL ALT TEXT ===');
+            console.log('Final alt text:', finalAltText);
+            console.log('Character count:', finalAltText.length);
+            
+            return finalAltText;
+        } else {
+            console.log('\n!!! GEMINI RESPONSE MISSING EXPECTED STRUCTURE !!!');
+            console.log('Using fallback: original product title');
         }
 
         // Fallback: use full title
-        return productTitle + imageNumber + brandSuffix;
+        const fallbackAltText = productTitle + imageNumber + brandSuffix;
+        console.log('\n=== FALLBACK ALT TEXT ===');
+        console.log('Fallback alt text:', fallbackAltText);
+        return fallbackAltText;
 
     } catch (error) {
-        console.error('Error generating optimized alt text with Gemini:', error);
+        console.error('\n!!! ERROR GENERATING OPTIMIZED ALT TEXT !!!');
+        console.error('Error details:', error);
 
         // Fallback: use full title
-        return productTitle + imageNumber + brandSuffix;
+        const fallbackAltText = productTitle + imageNumber + brandSuffix;
+        console.log('\n=== ERROR FALLBACK ALT TEXT ===');
+        console.log('Error fallback alt text:', fallbackAltText);
+        return fallbackAltText;
     }
 }
 
