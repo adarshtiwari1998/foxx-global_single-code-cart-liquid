@@ -407,41 +407,57 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
 
 // Function to fetch product details including media and variants
 async function fetchProductDetailsBySKU(sku) {
-    const query = `
-        query {
-            productVariants(first: 1, query: "sku:${sku}") {
-                edges {
-                    node {
-                        id
-                        sku
-                        title
-                        product {
+    // Try multiple SKU variations to handle Google Sheets auto-formatting
+    const skuVariations = [
+        sku, // Original SKU as provided
+        // Remove leading zeros from the last segment after the last dash
+        sku.replace(/-0+(\d+)$/, '-$1'),
+        // Remove leading zeros from all segments after dashes
+        sku.replace(/-0+(\d+)/g, '-$1')
+    ];
+
+    // Remove duplicates and keep unique variations
+    const uniqueSkus = [...new Set(skuVariations)];
+    
+    console.log(`Trying SKU variations: ${uniqueSkus.join(', ')}`);
+
+    for (const skuToTry of uniqueSkus) {
+        const query = `
+            query {
+                productVariants(first: 1, query: "sku:${skuToTry}") {
+                    edges {
+                        node {
                             id
+                            sku
                             title
-                            media(first: 50) {
-                                edges {
-                                    node {
-                                        id
-                                        alt
-                                        ... on MediaImage {
-                                            image {
-                                                url
+                            product {
+                                id
+                                title
+                                media(first: 50) {
+                                    edges {
+                                        node {
+                                            id
+                                            alt
+                                            ... on MediaImage {
+                                                image {
+                                                    url
+                                                }
                                             }
-                                        }
-                                        ... on Video {
-                                            sources {
-                                                url
+                                            ... on Video {
+                                                sources {
+                                                    url
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                            variants(first: 50) {
-                                edges {
-                                    node {
-                                        id
-                                        title
-                                        sku
+                                variants(first: 50) {
+                                    edges {
+                                        node {
+                                            id
+                                            title
+                                            sku
+                                        }
                                     }
                                 }
                             }
@@ -449,56 +465,59 @@ async function fetchProductDetailsBySKU(sku) {
                     }
                 }
             }
+        `;
+
+        try {
+            console.log(`Fetching product details for SKU variation: ${skuToTry}`);
+
+            // Check if access token is available
+            if (!shopifyAccessToken) {
+                console.error('Shopify access token is missing');
+                return null;
+            }
+
+            const response = await fetch(`https://${shopName}.myshopify.com/admin/api/2024-01/graphql.json`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Shopify-Access-Token': shopifyAccessToken,
+                },
+                body: JSON.stringify({ query }),
+            });
+
+            // Check if response is ok
+            if (!response.ok) {
+                console.error(`Shopify API response not ok: ${response.status} ${response.statusText}`);
+                continue; // Try next variation
+            }
+
+            const responseData = await response.json();
+
+            // Check if response has errors
+            if (responseData.errors) {
+                console.error('Shopify GraphQL errors:', responseData.errors);
+                continue; // Try next variation
+            }
+
+            // Check if data exists and has the expected structure
+            if (!responseData.data || !responseData.data.productVariants) {
+                console.error('Invalid response structure from Shopify API:', responseData);
+                continue; // Try next variation
+            }
+
+            const edges = responseData.data.productVariants.edges;
+            if (edges.length > 0) {
+                console.log(`✓ Found product with SKU variation: ${skuToTry} (original: ${sku})`);
+                return edges[0].node;
+            }
+        } catch (error) {
+            console.error(`Error fetching product details for SKU ${skuToTry}:`, error);
+            continue; // Try next variation
         }
-    `;
-
-    try {
-        console.log(`Fetching product details for SKU: ${sku}`);
-
-        // Check if access token is available
-        if (!shopifyAccessToken) {
-            console.error('Shopify access token is missing');
-            return null;
-        }
-
-        const response = await fetch(`https://${shopName}.myshopify.com/admin/api/2024-01/graphql.json`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Shopify-Access-Token': shopifyAccessToken,
-            },
-            body: JSON.stringify({ query }),
-        });
-
-        // Check if response is ok
-        if (!response.ok) {
-            console.error(`Shopify API response not ok: ${response.status} ${response.statusText}`);
-            return null;
-        }
-
-        const responseData = await response.json();
-
-        // Check if response has errors
-        if (responseData.errors) {
-            console.error('Shopify GraphQL errors:', responseData.errors);
-            return null;
-        }
-
-        // Check if data exists and has the expected structure
-        if (!responseData.data || !responseData.data.productVariants) {
-            console.error('Invalid response structure from Shopify API:', responseData);
-            return null;
-        }
-
-        const edges = responseData.data.productVariants.edges;
-        if (edges.length > 0) {
-            return edges[0].node;
-        }
-        return null;
-    } catch (error) {
-        console.error('Error fetching product details:', error);
-        return null;
     }
+
+    console.log(`✗ No product found for any SKU variation of: ${sku}`);
+    return null;
 }
 
 // Function to update only alt text in Shopify (skip name updates)
