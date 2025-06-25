@@ -215,62 +215,32 @@ function generateImageName(productTitle, variantInfo = '', imageIndex = 1, isSha
 }
 
 // Function to generate alt text using Gemini AI
-async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, maxLength = 140, variantCount = 0) {
+async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
     // Required components that must always be included
     const imageNumber = ` | img_${imageIndex}`;
     const brandSuffix = ' | Foxx Life Sciences Global | shopfls.com';
-    const requiredSuffixLength = imageNumber.length + brandSuffix.length;
 
-    // Calculate max content length - be more generous
-    const maxContentLength = maxLength - requiredSuffixLength - 2; // Minimal buffer
+    const prompt = `Create a comprehensive, SEO-friendly alt text for this product image. Make it detailed, descriptive, and optimized for search engines and accessibility:
 
-    // Smart title processing - preserve important parts
-    let processedTitle = productTitle;
+    Product Title: "${productTitle}"
+    ${variantInfo ? `Variant Information: "${variantInfo}"` : ''}
 
-    // Only shorten if the full title + suffixes would exceed the limit
-    const fullLength = productTitle.length + requiredSuffixLength;
-    if (fullLength > maxLength) {
-        // Try to preserve key parts of the title
-        const words = productTitle.split(' ');
-        let shortTitle = '';
+    SEO & Accessibility Requirements:
+    - Create a complete, detailed description of the product
+    - Include ALL brand names exactly as written (EZBio®, Foxx, VersaCap®, etc.)
+    - Include ALL model numbers, specifications, and technical details
+    - Include ALL size/capacity information (40L, 50L, etc.)
+    - Include ALL material descriptions and product features
+    - Include variant information when provided
+    - Use descriptive, searchable keywords that potential customers would use
+    - Make it informative for screen readers and visually impaired users
+    - Optimize for search engine discoverability
+    - Be comprehensive and complete - don't cut off any important details
+    - Focus on product benefits and key selling points
+    - DO NOT add ellipsis, dots, or truncate any information
+    - DO NOT add any extra text beyond the product description
 
-        // Always keep the first few important words
-        for (let i = 0; i < words.length; i++) {
-            const testTitle = shortTitle + (shortTitle ? ' ' : '') + words[i];
-            if (testTitle.length <= maxContentLength) {
-                shortTitle = testTitle;
-            } else {
-                break;
-            }
-        }
-
-        // If we have a reasonable length title, use it
-        if (shortTitle.length > 20) {
-            processedTitle = shortTitle;
-        } else {
-            // If too short, take the first part of the original title
-            processedTitle = productTitle.substring(0, maxContentLength);
-        }
-    }
-
-    const prompt = `Create an SEO-optimized alt text from this product title, targeting 125-150 characters total including suffixes:
-
-    Product Title: "${processedTitle}"
-    ${variantInfo ? `Variant Info: "${variantInfo}"` : ''}
-
-    CRITICAL Requirements:
-    - Target: 125-150 characters total (including " | img_${imageIndex} | Foxx Life Sciences Global | shopfls.com")
-    - Available space for description: ${maxContentLength} characters
-    - MUST preserve complete product identity - don't cut off critical details like "Round Carboy", "1/EA", etc.
-    - Keep ALL brand names exactly as written (EZBio®, Foxx, VersaCap®, etc.)
-    - Keep ALL model numbers and specifications (83B, 40L, 50L, etc.)
-    - Include ALL container types and quantities mentioned
-    - If needed, abbreviate common words (System→Sys, Rectangular→Rect) but keep core product info
-    - Prioritize completeness over brevity - better to use full space than cut important details
-    - DO NOT add ellipsis or dots
-    - DO NOT add any extra text
-
-    Return only the optimized description that fits in ${maxContentLength} characters, nothing else.`;
+    Create the most comprehensive, SEO-optimized alt text possible. Return only the product description, nothing else.`;
 
     try {
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
@@ -297,23 +267,18 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
             // Remove any ellipsis that Gemini might have added
             optimizedContent = optimizedContent.replace(/\.\.\.$/g, '');
 
-            // Final trim and length check
-            if (optimizedContent.length > maxContentLength) {
-                // If still too long, trim without adding ellipsis
-                optimizedContent = optimizedContent.substring(0, maxContentLength).trim();
-            }
-
+            // Return the complete alt text with no character limits
             return optimizedContent + imageNumber + brandSuffix;
         }
 
-        // Fallback: use processed title without ellipsis
-        return processedTitle + imageNumber + brandSuffix;
+        // Fallback: use full title
+        return productTitle + imageNumber + brandSuffix;
 
     } catch (error) {
         console.error('Error generating optimized alt text with Gemini:', error);
 
-        // Fallback: use processed title without ellipsis
-        return processedTitle + imageNumber + brandSuffix;
+        // Fallback: use full title
+        return productTitle + imageNumber + brandSuffix;
     }
 }
 
@@ -658,7 +623,7 @@ async function updateAltTextFromSheet(range) {
             existingImageNames.push(generatedImageName);
 
             // Generate SEO-friendly alt text using Gemini with variant info
-            const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex, 140, variantsUsingThisImage.length);
+            const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex);
 
             console.log(`Generated alt text: "${generatedAltText}"`);
 
