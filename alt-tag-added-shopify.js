@@ -266,10 +266,6 @@ async function fetchProductDetailsBySKU(sku) {
                                                 url
                                             }
                                         }
-                                        ... on GenericFile {
-                                            originalFileSize
-                                            url
-                                        }
                                     }
                                 }
                             }
