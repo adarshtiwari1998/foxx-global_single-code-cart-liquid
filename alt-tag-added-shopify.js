@@ -42,7 +42,7 @@ async function readGoogleSheet(range) {
 // Function to check if SKU is already processed
 async function isSkuAlreadyProcessed(sku) {
     try {
-        const range = 'Sheet1!A:D';
+        const range = 'Sheet1!A:E';
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: spreadsheetId,
             range: range,
@@ -50,10 +50,10 @@ async function isSkuAlreadyProcessed(sku) {
         
         const values = response.data.values || [];
         
-        // Skip header row and check if SKU exists with completed status
+        // Skip header row and check if SKU exists with UPDATED status
         for (let i = 1; i < values.length; i++) {
             const row = values[i];
-            if (row[0] === sku && row[3] && row[3].includes('images updated')) {
+            if (row[0] === sku && row[3] === 'UPDATED') {
                 return true;
             }
         }
@@ -65,9 +65,9 @@ async function isSkuAlreadyProcessed(sku) {
 }
 
 // Function to append alt text data to Google Sheets
-async function appendAltTextData(sku, altText, imageName, status) {
-    const range = 'Sheet1!A:D';
-    const values = [[sku, altText, imageName, status]];
+async function appendAltTextData(sku, altText, imageName, status, remarks) {
+    const range = 'Sheet1!A:E';
+    const values = [[sku, altText, imageName, status, remarks]];
 
     try {
         await sheets.spreadsheets.values.append({
@@ -78,16 +78,16 @@ async function appendAltTextData(sku, altText, imageName, status) {
                 values: values,
             },
         });
-        console.log(`Alt text data added for SKU: ${sku} - Status: ${status}`);
+        console.log(`Alt text data added for SKU: ${sku} - Status: ${status} - Remarks: ${remarks}`);
     } catch (error) {
         console.error('Error appending alt text data:', error);
     }
 }
 
 // Function to update existing row for SKU
-async function updateSkuStatus(sku, altText, imageName, status) {
+async function updateSkuStatus(sku, altText, imageName, status, remarks) {
     try {
-        const range = 'Sheet1!A:D';
+        const range = 'Sheet1!A:E';
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: spreadsheetId,
             range: range,
@@ -100,26 +100,26 @@ async function updateSkuStatus(sku, altText, imageName, status) {
             const row = values[i];
             if (row[0] === sku) {
                 // Update the specific row
-                const updateRange = `Sheet1!A${i + 1}:D${i + 1}`;
+                const updateRange = `Sheet1!A${i + 1}:E${i + 1}`;
                 await sheets.spreadsheets.values.update({
                     spreadsheetId: spreadsheetId,
                     range: updateRange,
                     valueInputOption: 'RAW',
                     requestBody: {
-                        values: [[sku, altText, imageName, status]],
+                        values: [[sku, altText, imageName, status, remarks]],
                     },
                 });
-                console.log(`Updated existing row for SKU: ${sku} - Status: ${status}`);
+                console.log(`Updated existing row for SKU: ${sku} - Status: ${status} - Remarks: ${remarks}`);
                 return;
             }
         }
         
         // If SKU not found, append new row
-        await appendAltTextData(sku, altText, imageName, status);
+        await appendAltTextData(sku, altText, imageName, status, remarks);
     } catch (error) {
         console.error('Error updating SKU status:', error);
         // Fallback to append
-        await appendAltTextData(sku, altText, imageName, status);
+        await appendAltTextData(sku, altText, imageName, status, remarks);
     }
 }
 
@@ -429,13 +429,13 @@ async function updateAltTextFromSheet(range) {
         console.log(`\n--- Processing SKU: ${sku} ---`);
 
         // Update sheet with "Processing" status
-        await updateSkuStatus(sku, 'Processing...', 'Processing...', 'Processing');
+        await updateSkuStatus(sku, 'Processing...', 'Processing...', 'Processing', 'Processing...');
 
         const productDetails = await fetchProductDetailsBySKU(sku);
         if (!productDetails) {
             console.warn(`SKU ${sku} not found in Shopify`);
             await appendToMissingSKU(sku);
-            await updateSkuStatus(sku, 'N/A', 'N/A', 'SKU not found');
+            await updateSkuStatus(sku, 'N/A', 'N/A', 'FAILED', 'SKU not found in Shopify');
             continue;
         }
 
@@ -446,7 +446,7 @@ async function updateAltTextFromSheet(range) {
 
         if (mediaEdges.length === 0) {
             console.log(`No media found for SKU: ${sku}`);
-            await updateSkuStatus(sku, 'N/A', 'N/A', 'No media found');
+            await updateSkuStatus(sku, 'N/A', 'N/A', 'FAILED', 'No media found for this product');
             continue;
         }
 
@@ -509,10 +509,11 @@ async function updateAltTextFromSheet(range) {
         }
 
         // Record the results in Google Sheets
-        const status = failCount === 0 ? `All ${successCount} images updated` : `${successCount} success, ${failCount} failed`;
+        const status = failCount === 0 ? 'UPDATED' : 'FAILED';
+        const remarks = failCount === 0 ? `All ${successCount} images updated` : `${successCount} success, ${failCount} failed`;
         const combinedAltTexts = altTextsGenerated.join(' | ');
         const combinedImageNames = imageNamesGenerated.join(' | ');
-        await updateSkuStatus(sku, combinedAltTexts, combinedImageNames, status);
+        await updateSkuStatus(sku, combinedAltTexts, combinedImageNames, status, remarks);
 
         console.log(`--- Completed SKU: ${sku} (${successCount}/${successCount + failCount} images updated) ---\n`);
 
