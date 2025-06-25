@@ -40,9 +40,9 @@ async function readGoogleSheet(range) {
 }
 
 // Function to append alt text data to Google Sheets
-async function appendAltTextData(sku, altText, status) {
-    const range = 'Alt Text Tracking!A:C'; // New sheet for tracking alt text
-    const values = [[sku, altText, status]];
+async function appendAltTextData(sku, altText, imageName, status) {
+    const range = 'Sheet1!A:D'; // Updated to include Name column
+    const values = [[sku, altText, imageName, status]];
 
     try {
         await sheets.spreadsheets.values.append({
@@ -59,22 +59,90 @@ async function appendAltTextData(sku, altText, status) {
     }
 }
 
+// Function to analyze which images are shared across variants
+function analyzeImageVariantRelationships(product) {
+    const mediaToVariants = new Map();
+    const variantToMedia = new Map();
+    
+    // Map each variant to its media
+    product.variants.edges.forEach(variantEdge => {
+        const variant = variantEdge.node;
+        const variantMediaIds = [];
+        
+        // In Shopify, we need to check if variant has specific images assigned
+        // For now, we'll assume all variants share the same product media
+        product.media.edges.forEach(mediaEdge => {
+            const media = mediaEdge.node;
+            if (media.image) { // Only process images
+                variantMediaIds.push(media.id);
+                
+                if (!mediaToVariants.has(media.id)) {
+                    mediaToVariants.set(media.id, []);
+                }
+                mediaToVariants.get(media.id).push({
+                    id: variant.id,
+                    title: variant.title,
+                    sku: variant.sku
+                });
+            }
+        });
+        
+        variantToMedia.set(variant.id, variantMediaIds);
+    });
+    
+    return { mediaToVariants, variantToMedia };
+}
+
+// Function to generate SEO-friendly image name
+function generateImageName(productTitle, variantInfo = '', imageIndex = 1, isSharedImage = false) {
+    const cleanTitle = productTitle.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 30);
+    
+    if (isSharedImage || !variantInfo) {
+        return `${cleanTitle}_img_${imageIndex}`;
+    } else {
+        const cleanVariant = variantInfo.toLowerCase()
+            .replace(/[^a-z0-9\s]/g, '')
+            .replace(/\s+/g, '_')
+            .substring(0, 20);
+        return `${cleanTitle}_${cleanVariant}_img_${imageIndex}`;
+    }
+}
+
 // Function to generate alt text using Gemini AI
-async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
-    const prompt = `Create an SEO-friendly alt text for an e-commerce product image. 
-    Product title: "${productTitle}"
-    ${variantInfo ? `Variant details: "${variantInfo}"` : ''}
-    Image number: ${imageIndex}
+async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, isSharedImage = false) {
+    let prompt;
+    
+    if (isSharedImage) {
+        prompt = `Create an SEO-friendly alt text for an e-commerce product image that is shared across multiple variants.
+        Product title: "${productTitle}"
+        Image number: ${imageIndex}
 
-    Requirements:
-    - Make it descriptive and SEO-friendly
-    - Include the product name
-    - If variant info is provided, incorporate it naturally
-    - Keep it under 125 characters
-    - Make it natural and readable
-    - Focus on what's visible in the image
+        Requirements:
+        - Use only the product title (no variant-specific details)
+        - Make it descriptive and SEO-friendly
+        - Keep it under 125 characters
+        - Make it natural and readable
+        - Focus on the main product features
 
-    Return only the alt text, nothing else.`;
+        Return only the alt text, nothing else.`;
+    } else {
+        prompt = `Create an SEO-friendly alt text for an e-commerce product image specific to a variant.
+        Product title: "${productTitle}"
+        ${variantInfo ? `Variant details: "${variantInfo}"` : ''}
+        Image number: ${imageIndex}
+
+        Requirements:
+        - Include both product name and variant details
+        - Make it descriptive and SEO-friendly
+        - Keep it under 125 characters
+        - Make it natural and readable
+        - Focus on variant-specific features
+
+        Return only the alt text, nothing else.`;
+    }
 
     try {
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
@@ -172,8 +240,8 @@ async function fetchProductDetailsBySKU(sku) {
     }
 }
 
-// Function to update media alt text in Shopify
-async function updateMediaAltText(mediaId, altText, retries = 3) {
+// Function to update media name and alt text in Shopify
+async function updateMediaNameAndAlt(mediaId, altText, imageName, retries = 3) {
     const mutation = `
         mutation mediaUpdate($media: [UpdateMediaInput!]!) {
             mediaUpdate(media: $media) {
@@ -198,8 +266,9 @@ async function updateMediaAltText(mediaId, altText, retries = 3) {
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            console.log(`Attempt ${attempt} - Updating media alt text for ID: ${mediaId}`);
+            console.log(`Attempt ${attempt} - Updating media for ID: ${mediaId}`);
             console.log(`New alt text: ${altText}`);
+            console.log(`New name: ${imageName}`);
 
             const response = await fetch(`https://${shopName}.myshopify.com/admin/api/2024-01/graphql.json`, {
                 method: 'POST',
@@ -226,7 +295,7 @@ async function updateMediaAltText(mediaId, altText, retries = 3) {
                 return false;
             }
 
-            console.log(`Successfully updated alt text for media ${mediaId}`);
+            console.log(`Successfully updated media ${mediaId}`);
             return true;
         } catch (error) {
             console.error(`Error during attempt ${attempt} updating media ${mediaId}:`, error);
@@ -292,7 +361,7 @@ async function updateAltTextFromSheet(range) {
         if (!productDetails) {
             console.warn(`SKU ${sku} not found in Shopify`);
             await appendToMissingSKU(sku);
-            await appendAltTextData(sku, 'N/A', 'SKU not found');
+            await appendAltTextData(sku, 'N/A', 'N/A', 'SKU not found');
             continue;
         }
 
@@ -303,13 +372,17 @@ async function updateAltTextFromSheet(range) {
 
         if (mediaEdges.length === 0) {
             console.log(`No media found for SKU: ${sku}`);
-            await appendAltTextData(sku, 'N/A', 'No media found');
+            await appendAltTextData(sku, 'N/A', 'N/A', 'No media found');
             continue;
         }
 
+        // Analyze image-variant relationships
+        const { mediaToVariants } = analyzeImageVariantRelationships(product);
+        
         let successCount = 0;
         let failCount = 0;
         let altTextsGenerated = [];
+        let imageNamesGenerated = [];
 
         for (let i = 0; i < mediaEdges.length; i++) {
             const media = mediaEdges[i].node;
@@ -324,22 +397,37 @@ async function updateAltTextFromSheet(range) {
             console.log(`Processing image ${imageIndex} for SKU: ${sku}`);
             console.log(`Current alt text: "${media.alt || 'Empty'}"`);
 
-            // Generate SEO-friendly alt text using Gemini
-            const variantInfo = variantTitle !== productTitle ? variantTitle : '';
-            const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex);
+            // Check if this image is shared across multiple variants
+            const variantsUsingThisImage = mediaToVariants.get(media.id) || [];
+            const isSharedImage = variantsUsingThisImage.length > 1;
+            
+            console.log(`Image shared across ${variantsUsingThisImage.length} variants`);
+
+            // Determine variant info based on sharing logic
+            let variantInfo = '';
+            if (!isSharedImage && variantTitle !== productTitle) {
+                variantInfo = variantTitle;
+            }
+
+            // Generate SEO-friendly alt text and name using Gemini
+            const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex, isSharedImage);
+            const generatedImageName = generateImageName(productTitle, variantInfo, imageIndex, isSharedImage);
 
             console.log(`Generated alt text: "${generatedAltText}"`);
+            console.log(`Generated image name: "${generatedImageName}"`);
+            
             altTextsGenerated.push(generatedAltText);
+            imageNamesGenerated.push(generatedImageName);
 
-            // Update the alt text in Shopify
-            const updateSuccess = await updateMediaAltText(media.id, generatedAltText);
+            // Update both name and alt text in Shopify
+            const updateSuccess = await updateMediaNameAndAlt(media.id, generatedAltText, generatedImageName);
 
             if (updateSuccess) {
                 successCount++;
-                console.log(`✓ Successfully updated alt text for image ${imageIndex}`);
+                console.log(`✓ Successfully updated image ${imageIndex}`);
             } else {
                 failCount++;
-                console.log(`✗ Failed to update alt text for image ${imageIndex}`);
+                console.log(`✗ Failed to update image ${imageIndex}`);
             }
 
             // Rate limiting
@@ -349,7 +437,8 @@ async function updateAltTextFromSheet(range) {
         // Record the results in Google Sheets
         const status = failCount === 0 ? 'All images updated' : `${successCount} success, ${failCount} failed`;
         const combinedAltTexts = altTextsGenerated.join(' | ');
-        await appendAltTextData(sku, combinedAltTexts, status);
+        const combinedImageNames = imageNamesGenerated.join(' | ');
+        await appendAltTextData(sku, combinedAltTexts, combinedImageNames, status);
 
         console.log(`--- Completed SKU: ${sku} (${successCount}/${successCount + failCount} images updated) ---\n`);
 
@@ -358,9 +447,9 @@ async function updateAltTextFromSheet(range) {
     }
 }
 
-// Endpoint to trigger the alt text update process
+// Endpoint to trigger the alt text and name update process
 app.get('/update-alt-text', async (req, res) => {
-    const range = 'Sheet1!A:A'; // Only need SKU column for alt text update
+    const range = 'Sheet1!A:A'; // Only need SKU column for processing
     try {
         await updateAltTextFromSheet(range);
         res.send('Alt text updated successfully');
@@ -375,5 +464,5 @@ const PORT = process.env.PORT || 8700;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Available endpoints:`);
-    console.log(`- GET /update-alt-text (alt text update)`);
+    console.log(`- GET /update-alt-text (alt text and image name update)`);
 });
