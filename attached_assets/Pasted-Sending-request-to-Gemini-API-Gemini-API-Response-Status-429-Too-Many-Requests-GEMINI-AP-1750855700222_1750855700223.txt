@@ -1,0 +1,327 @@
+Sending request to Gemini API...
+Gemini API Response Status: 429 Too Many Requests
+
+=== GEMINI API FULL RESPONSE ===
+{
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-2.0-flash"
+            },
+            "quotaValue": "200"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "1s"
+      }
+    ]
+  }
+}
+
+!!! GEMINI API QUOTA EXCEEDED - USING FALLBACK !!!
+Error message: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. 
+Suggested retry delay: 1s
+Using fallback alt text generation due to quota limit...
+
+=== QUOTA EXCEEDED FALLBACK ALT TEXT ===
+Fallback alt text: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_2 | Foxx Life Sciences Global | shopfls.com
+Generated alt text: "EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_2 | Foxx Life Sciences Global | shopfls.com"
+Attempt 1 - Updating alt text for media ID: gid://shopify/MediaImage/26353691066523
+New alt text: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_2 | Foxx Life Sciences Global | shopfls.com
+Processing image 2 for SKU: 527-7400-FLS
+Current alt text: "EZBio® pure Titanium Round MTO 1L Bottle with GL45 VersaCap®. Multiple Sizes. Laboratory bottle for bioprocessing. 10/CS. | img_2 | Foxx Life Sciences Global | shopfls.com"
+Image assigned to 48 variants
+Variant info for this image: "Multiple Sizes"
+Generated image name: "ezbiopure_titanium_round_mto_1_img_2"
+
+=== GEMINI API REQUEST ===
+Product Title: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS
+Variant Info: Multiple Sizes
+Image Index: 2
+Prompt being sent to Gemini:
+---START PROMPT---
+Transform this product title into a compelling, SEO-optimized alt text for an image:
+
+    Original Product: "EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS"
+    Variant Details: "Multiple Sizes"
+
+    CRITICAL REQUIREMENTS:
+    - Maximum 150 characters for the description (excluding image number and brand suffix)
+    - Must be concise but descriptive
+    - Keep all brand names: EZBio®, Foxx, VersaCap®, etc.
+    - Keep model numbers: 83B, etc.
+    - Keep key specifications: 40L, 50L, etc.
+
+    ENHANCE WITH (if space allows):
+    - Key adjectives (premium, laboratory-grade, leak-proof)
+    - Usage context (laboratory, bioprocessing, research)
+    - Essential product benefits
+
+    WRITE STYLE:
+    - Concise and informative
+    - Professional terminology
+    - Essential keywords for SEO
+    - Complete phrases, avoid unnecessary words
+
+    Example:
+    Instead of long descriptions, create: "Premium EZBio® Silicone Cap System with VersaCap® 83B for 40L/50L Carboys - Laboratory-Grade Leak-Proof Bioprocessing Equipment"
+
+    Return ONLY the enhanced description under 150 characters, nothing else.
+---END PROMPT---
+
+Sending request to Gemini API...
+Successfully updated alt text for media gid://shopify/MediaImage/26353691066523
+✓ Successfully updated alt text for image 2
+Gemini API Response Status: 429 Too Many Requests
+
+=== GEMINI API FULL RESPONSE ===
+{
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-2.0-flash"
+            },
+            "quotaValue": "200"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "59s"
+      }
+    ]
+  }
+}
+
+!!! GEMINI API QUOTA EXCEEDED - USING FALLBACK !!!
+Error message: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. 
+Suggested retry delay: 59s
+Using fallback alt text generation due to quota limit...
+
+=== QUOTA EXCEEDED FALLBACK ALT TEXT ===
+Fallback alt text: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_2 | Foxx Life Sciences Global | shopfls.com
+Generated alt text: "EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_2 | Foxx Life Sciences Global | shopfls.com"
+Attempt 1 - Updating alt text for media ID: gid://shopify/MediaImage/26353691066523
+New alt text: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_2 | Foxx Life Sciences Global | shopfls.com
+Successfully updated alt text for media gid://shopify/MediaImage/26353691066523
+✓ Successfully updated alt text for image 2
+Processing image 3 for SKU: 527-7400-FLS
+Current alt text: "EZBio® pure Titanium 1L Bottle Assembly with GL45 VersaCap® - Multiple Sizes - Foxx, Laboratory-Grade Bioprocessing | img_3 | Foxx Life Sciences Global | shopfls.com"
+Image assigned to 48 variants
+Variant info for this image: "Multiple Sizes"
+Generated image name: "ezbiopure_titanium_round_mto_1_img_3"
+
+=== GEMINI API REQUEST ===
+Product Title: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS
+Variant Info: Multiple Sizes
+Image Index: 3
+Prompt being sent to Gemini:
+---START PROMPT---
+Transform this product title into a compelling, SEO-optimized alt text for an image:
+
+    Original Product: "EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS"
+    Variant Details: "Multiple Sizes"
+
+    CRITICAL REQUIREMENTS:
+    - Maximum 150 characters for the description (excluding image number and brand suffix)
+    - Must be concise but descriptive
+    - Keep all brand names: EZBio®, Foxx, VersaCap®, etc.
+    - Keep model numbers: 83B, etc.
+    - Keep key specifications: 40L, 50L, etc.
+
+    ENHANCE WITH (if space allows):
+    - Key adjectives (premium, laboratory-grade, leak-proof)
+    - Usage context (laboratory, bioprocessing, research)
+    - Essential product benefits
+
+    WRITE STYLE:
+    - Concise and informative
+    - Professional terminology
+    - Essential keywords for SEO
+    - Complete phrases, avoid unnecessary words
+
+    Example:
+    Instead of long descriptions, create: "Premium EZBio® Silicone Cap System with VersaCap® 83B for 40L/50L Carboys - Laboratory-Grade Leak-Proof Bioprocessing Equipment"
+
+    Return ONLY the enhanced description under 150 characters, nothing else.
+---END PROMPT---
+
+Sending request to Gemini API...
+Gemini API Response Status: 429 Too Many Requests
+
+=== GEMINI API FULL RESPONSE ===
+{
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "model": "gemini-2.0-flash",
+              "location": "global"
+            },
+            "quotaValue": "200"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "58s"
+      }
+    ]
+  }
+}
+
+!!! GEMINI API QUOTA EXCEEDED - USING FALLBACK !!!
+Error message: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. 
+Suggested retry delay: 58s
+Using fallback alt text generation due to quota limit...
+
+=== QUOTA EXCEEDED FALLBACK ALT TEXT ===
+Fallback alt text: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_3 | Foxx Life Sciences Global | shopfls.com
+Generated alt text: "EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_3 | Foxx Life Sciences Global | shopfls.com"
+Attempt 1 - Updating alt text for media ID: gid://shopify/MediaImage/26353691623579
+New alt text: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS - Multiple Sizes | img_3 | Foxx Life Sciences Global | shopfls.com
+Successfully updated alt text for media gid://shopify/MediaImage/26353691623579
+✓ Successfully updated alt text for image 3
+Processing image 3 for SKU: 527-7400-FLS
+Current alt text: "EZBio® pure Titanium 1L Bottle Assembly with GL45 VersaCap® - Multiple Sizes - Foxx, Laboratory-Grade Bioprocessing | img_3 | Foxx Life Sciences Global | shopfls.com"
+Image assigned to 48 variants
+Variant info for this image: "Multiple Sizes"
+Generated image name: "ezbiopure_titanium_round_mto_1_img_3"
+
+=== GEMINI API REQUEST ===
+Product Title: EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS
+Variant Info: Multiple Sizes
+Image Index: 3
+Prompt being sent to Gemini:
+---START PROMPT---
+Transform this product title into a compelling, SEO-optimized alt text for an image:
+
+    Original Product: "EZBio®pure Titanium Round MTO 1L Bottle Assembly, GL45 VersaCap®, 10/CS"
+    Variant Details: "Multiple Sizes"
+
+    CRITICAL REQUIREMENTS:
+    - Maximum 150 characters for the description (excluding image number and brand suffix)
+    - Must be concise but descriptive
+    - Keep all brand names: EZBio®, Foxx, VersaCap®, etc.
+    - Keep model numbers: 83B, etc.
+    - Keep key specifications: 40L, 50L, etc.
+
+    ENHANCE WITH (if space allows):
+    - Key adjectives (premium, laboratory-grade, leak-proof)
+    - Usage context (laboratory, bioprocessing, research)
+    - Essential product benefits
+
+    WRITE STYLE:
+    - Concise and informative
+    - Professional terminology
+    - Essential keywords for SEO
+    - Complete phrases, avoid unnecessary words
+
+    Example:
+    Instead of long descriptions, create: "Premium EZBio® Silicone Cap System with VersaCap® 83B for 40L/50L Carboys - Laboratory-Grade Leak-Proof Bioprocessing Equipment"
+
+    Return ONLY the enhanced description under 150 characters, nothing else.
+---END PROMPT---
+
+Sending request to Gemini API...
+Gemini API Response Status: 429 Too Many Requests
+
+=== GEMINI API FULL RESPONSE ===
+{
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "model": "gemini-2.0-flash",
+              "location": "global"
+            },
+            "quotaValue": "200"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "56s"
+      }
+    ]
+  }
+}
+
+!!! GEMINI API QUOTA EXCEEDED - USING FALLBACK !!!
+Error message: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. 
+Suggested retry delay: 56s
+Using fallback alt text generation due to quota limit...
