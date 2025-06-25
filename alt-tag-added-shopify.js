@@ -221,23 +221,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
     const brandSuffix = ' | Foxx Life Sciences Global | shopfls.com';
     const requiredSuffixLength = imageNumber.length + brandSuffix.length;
     
-    // Create initial alt text with all components
-    let baseAltText = productTitle;
-    
-    // Add variant info if available
-    if (variantInfo) {
-        baseAltText += ` | ${variantInfo}`;
-    }
-    
-    // Check if the combined text is too long
-    const totalLength = baseAltText.length + requiredSuffixLength;
-    
-    if (totalLength <= maxLength) {
-        // If it fits, return as is
-        return baseAltText + imageNumber + brandSuffix;
-    }
-    
-    // If too long, use Gemini to create a shorter, SEO-friendly version
+    // Always use Gemini to create optimized, SEO-friendly alt text
     const maxContentLength = maxLength - requiredSuffixLength - 5; // Extra buffer
     
     let variantContext = '';
@@ -639,11 +623,6 @@ async function updateAltTextFromSheet(range) {
             console.log(`Processing image ${imageIndex} for SKU: ${sku}`);
             console.log(`Current alt text: "${media.alt || 'Empty'}"`);
 
-            // Extract existing image name from URL
-            const existingImageName = extractImageNameFromUrl(media.image.url);
-            console.log(`Existing image name: "${existingImageName}"`);
-            existingImageNames.push(existingImageName);
-
             // Get variant information for this specific image
             const variantInfo = getVariantInfoForImage(mediaToVariants, media.id);
             const variantsUsingThisImage = mediaToVariants.get(media.id) || [];
@@ -652,6 +631,12 @@ async function updateAltTextFromSheet(range) {
             if (variantInfo) {
                 console.log(`Variant info for this image: "${variantInfo}"`);
             }
+
+            // Generate SEO-friendly image name using the generateImageName function
+            const isSharedImage = variantsUsingThisImage.length > 3; // Consider shared if used by more than 3 variants
+            const generatedImageName = generateImageName(productTitle, variantInfo, imageIndex, isSharedImage);
+            console.log(`Generated image name: "${generatedImageName}"`);
+            existingImageNames.push(generatedImageName);
 
             // Generate SEO-friendly alt text using Gemini with variant info
             const generatedAltText = await generateAltText(productTitle, variantInfo, imageIndex, 140, variantsUsingThisImage.length);
