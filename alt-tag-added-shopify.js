@@ -161,13 +161,13 @@ function analyzeImageVariantRelationships(product) {
 function getVariantInfoForImage(mediaToVariants, mediaId) {
     const variants = mediaToVariants.get(mediaId) || [];
     if (variants.length === 0) return '';
-    
+
     // Extract unique variant titles (excluding default titles that match product name)
     const variantTitles = variants
         .map(v => v.title)
         .filter((title, index, arr) => arr.indexOf(title) === index) // Remove duplicates
         .filter(title => title && title !== 'Default Title'); // Remove empty and default titles
-    
+
     // If image is shared across many variants (more than 5), use a generic approach
     if (variantTitles.length > 5) {
         // Try to find common patterns or categories
@@ -177,7 +177,7 @@ function getVariantInfoForImage(mediaToVariants, mediaId) {
         const hasSizes = variantTitles.some(title => 
             /(small|medium|large|xs|s|m|l|xl|\d+ml|\d+L|\d+mm|\d+cm)/i.test(title)
         );
-        
+
         let summary = '';
         if (hasColors && hasSizes) {
             summary = 'Multiple Colors & Sizes';
@@ -188,10 +188,10 @@ function getVariantInfoForImage(mediaToVariants, mediaId) {
         } else {
             summary = `${variantTitles.length} Variants Available`;
         }
-        
+
         return summary;
     }
-    
+
     // For 5 or fewer variants, include them all
     return variantTitles.join(' | ');
 }
@@ -220,20 +220,20 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
     const imageNumber = ` | img_${imageIndex}`;
     const brandSuffix = ' | Foxx Life Sciences Global | shopfls.com';
     const requiredSuffixLength = imageNumber.length + brandSuffix.length;
-    
+
     // Calculate max content length - be more generous
     const maxContentLength = maxLength - requiredSuffixLength - 2; // Minimal buffer
-    
+
     // Smart title processing - preserve important parts
     let processedTitle = productTitle;
-    
+
     // Only shorten if the full title + suffixes would exceed the limit
     const fullLength = productTitle.length + requiredSuffixLength;
     if (fullLength > maxLength) {
         // Try to preserve key parts of the title
         const words = productTitle.split(' ');
         let shortTitle = '';
-        
+
         // Always keep the first few important words
         for (let i = 0; i < words.length; i++) {
             const testTitle = shortTitle + (shortTitle ? ' ' : '') + words[i];
@@ -243,7 +243,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
                 break;
             }
         }
-        
+
         // If we have a reasonable length title, use it
         if (shortTitle.length > 20) {
             processedTitle = shortTitle;
@@ -252,24 +252,24 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
             processedTitle = productTitle.substring(0, maxContentLength);
         }
     }
-    
-    const prompt = `Optimize this product title for SEO and accessibility while keeping it under ${maxContentLength} characters:
 
-    "${processedTitle}"
-    
-    SEO Requirements:
-    - Maximum ${maxContentLength} characters
-    - Keep all brand names (like EZBio®, Foxx, etc.)
-    - Keep model numbers and key identifiers
-    - Keep essential product features and specifications
-    - Use descriptive keywords that users might search for
-    - Make it concise but informative
-    - Prioritize key product attributes (size, material, capacity, etc.)
+    const prompt = `Create an SEO-optimized alt text from this product title and variant info, targeting 125-150 characters total including suffixes:
+
+    Product Title: "${processedTitle}"
+    ${variantInfo ? `Variant Info: "${variantInfo}"` : ''}
+
+    Requirements:
+    - Target length: 125-150 characters (including " | img_${imageIndex} | Foxx Life Sciences Global | shopfls.com")
+    - Current content limit: ${maxContentLength} characters for the main description
+    - Keep all brand names (EZBio®, Foxx, VersaCap®, etc.)
+    - Include model numbers and key specifications
+    - Include variant details when provided
+    - Use descriptive, searchable keywords
+    - Make it concise but informative for accessibility and SEO
     - DO NOT add ellipsis or dots
-    - DO NOT add any extra text
-    - Focus on searchable terms and product benefits
-    
-    Return only the optimized title, nothing else.`;
+    - DO NOT add any extra text beyond what's requested
+
+    Return only the optimized product description, nothing else.`;
 
     try {
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
@@ -289,28 +289,28 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
         const data = await response.json();
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
             let optimizedContent = data.candidates[0].content.parts[0].text.trim();
-            
+
             // Remove quotes if Gemini added them
             optimizedContent = optimizedContent.replace(/^["']|["']$/g, '');
-            
+
             // Remove any ellipsis that Gemini might have added
             optimizedContent = optimizedContent.replace(/\.\.\.$/g, '');
-            
+
             // Final trim and length check
             if (optimizedContent.length > maxContentLength) {
                 // If still too long, trim without adding ellipsis
                 optimizedContent = optimizedContent.substring(0, maxContentLength).trim();
             }
-            
+
             return optimizedContent + imageNumber + brandSuffix;
         }
-        
+
         // Fallback: use processed title without ellipsis
         return processedTitle + imageNumber + brandSuffix;
-        
+
     } catch (error) {
         console.error('Error generating optimized alt text with Gemini:', error);
-        
+
         // Fallback: use processed title without ellipsis
         return processedTitle + imageNumber + brandSuffix;
     }
@@ -365,13 +365,13 @@ async function fetchProductDetailsBySKU(sku) {
 
     try {
         console.log(`Fetching product details for SKU: ${sku}`);
-        
+
         // Check if access token is available
         if (!shopifyAccessToken) {
             console.error('Shopify access token is missing');
             return null;
         }
-        
+
         const response = await fetch(`https://${shopName}.myshopify.com/admin/api/2024-01/graphql.json`, {
             method: 'POST',
             headers: {
@@ -388,19 +388,19 @@ async function fetchProductDetailsBySKU(sku) {
         }
 
         const responseData = await response.json();
-        
+
         // Check if response has errors
         if (responseData.errors) {
             console.error('Shopify GraphQL errors:', responseData.errors);
             return null;
         }
-        
+
         // Check if data exists and has the expected structure
         if (!responseData.data || !responseData.data.productVariants) {
             console.error('Invalid response structure from Shopify API:', responseData);
             return null;
         }
-        
+
         const edges = responseData.data.productVariants.edges;
         if (edges.length > 0) {
             return edges[0].node;
@@ -496,7 +496,7 @@ async function appendToMissingSKU(sku) {
     try {
         // First, try to read from the Missing SKU sheet to see if it exists
         const range = 'Missing SKU on Website!A:A';
-        
+
         try {
             // Try to get the sheet first
             await sheets.spreadsheets.values.get({
@@ -554,7 +554,7 @@ async function updateAltTextFromSheet(range) {
     // Check the status sheet to see which SKUs already have alt text
     const statusRows = await readGoogleSheet('Sheet1!A:E');
     const processedSKUs = new Set();
-    
+
     if (statusRows && statusRows.length > 1) {
         // Skip header row
         for (let i = 1; i < statusRows.length; i++) {
@@ -562,7 +562,7 @@ async function updateAltTextFromSheet(range) {
             const processedSku = statusRow[0]; // SKU column
             const altText = statusRow[1]; // Alt text column
             const status = statusRow[3]; // Status column
-            
+
             // If SKU has alt text filled and status is UPDATED, mark as already processed
             if (processedSku && altText && altText !== 'Processing...' && altText !== 'N/A' && status === 'UPDATED') {
                 processedSKUs.add(processedSku);
@@ -644,7 +644,7 @@ async function updateAltTextFromSheet(range) {
             // Get variant information for this specific image
             const variantInfo = getVariantInfoForImage(mediaToVariants, media.id);
             const variantsUsingThisImage = mediaToVariants.get(media.id) || [];
-            
+
             console.log(`Image assigned to ${variantsUsingThisImage.length} variants`);
             if (variantInfo) {
                 console.log(`Variant info for this image: "${variantInfo}"`);
@@ -708,13 +708,13 @@ app.get('/update-alt-text', async (req, res) => {
 function validateEnvironmentVariables() {
     const required = ['SHOPIFY_ADMIN_ACCESS_TOKEN', 'GOOGLE_SHEET_ID', 'GEMINI_API_KEY'];
     const missing = required.filter(key => !process.env[key]);
-    
+
     if (missing.length > 0) {
         console.error('Missing required environment variables:', missing);
         console.error('Please set these in your .env file or environment');
         return false;
     }
-    
+
     console.log('✓ All required environment variables are set');
     return true;
 }
@@ -725,7 +725,7 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Available endpoints:`);
     console.log(`- GET /update-alt-text (alt text update with brand suffix, preserves image names, resumes from last position)`);
-    
+
     // Validate environment variables at startup
     validateEnvironmentVariables();
 });
