@@ -219,41 +219,36 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
     // Required components that must always be included
     const imageNumber = ` | img_${imageIndex}`;
     const brandSuffix = ' | Foxx Life Sciences Global | shopfls.com';
+    const requiredSuffixLength = imageNumber.length + brandSuffix.length;
+    const maxContentLength = 200 - requiredSuffixLength; // Leave room for required suffix
 
-    const prompt = `Transform this product title into a compelling, SEO-optimized, and descriptive alt text that would rank well in search engines and appeal to customers:
+    const prompt = `Transform this product title into a compelling, SEO-optimized alt text for an image:
 
     Original Product: "${productTitle}"
     ${variantInfo ? `Variant Details: "${variantInfo}"` : ''}
 
-    Create an enhanced, SEO-friendly description that:
+    CRITICAL REQUIREMENTS:
+    - Maximum ${maxContentLength} characters for the description (excluding image number and brand suffix)
+    - Must be concise but descriptive
+    - Keep all brand names: EZBio®, Foxx, VersaCap®, etc.
+    - Keep model numbers: 83B, etc.
+    - Keep key specifications: 40L, 50L, etc.
     
-    MUST INCLUDE (preserve exactly):
-    - All brand names: EZBio®, Foxx, VersaCap®, etc.
-    - All model numbers: 83B, etc.
-    - All specifications: 40L, 50L, capacities, dimensions
-    - All technical details and materials
-    
-    ENHANCE WITH:
-    - Descriptive adjectives (premium, professional, laboratory-grade, etc.)
-    - Product benefits (leak-proof, sterile, durable, etc.)
-    - Usage context (laboratory equipment, bioprocessing, research, etc.)
-    - Material qualities (silicone flexibility, chemical resistance, etc.)
-    - Professional terminology that customers search for
-    - Clear product category identification
+    ENHANCE WITH (if space allows):
+    - Key adjectives (premium, laboratory-grade, leak-proof)
+    - Usage context (laboratory, bioprocessing, research)
+    - Essential product benefits
     
     WRITE STYLE:
-    - Professional yet accessible language
-    - Rich descriptive keywords for SEO
-    - Complete sentences that flow naturally
-    - Include searchable terms customers would use
-    - Make it informative and compelling
-    - Perfect for screen readers and search engines
+    - Concise and informative
+    - Professional terminology
+    - Essential keywords for SEO
+    - Complete phrases, avoid unnecessary words
     
-    Example transformation:
-    Instead of: "EZBio® Over Molded Silicone Cap System with VersaCap® 83B for 40L Rectangular and 50L Round Carboy 1/EA"
-    Create: "Professional EZBio® Over-Molded Silicone Cap System featuring VersaCap® 83B Technology for 40L Rectangular and 50L Round Laboratory Carboys - Premium Leak-Proof Bioprocessing Equipment for Research and Industrial Applications, Single Unit"
+    Example:
+    Instead of long descriptions, create: "Premium EZBio® Silicone Cap System with VersaCap® 83B for 40L/50L Carboys - Laboratory-Grade Leak-Proof Bioprocessing Equipment"
     
-    Transform the product title into a rich, SEO-optimized description. Return only the enhanced description, nothing else.`;
+    Return ONLY the enhanced description under ${maxContentLength} characters, nothing else.`;
 
     try {
         console.log('\n=== GEMINI API REQUEST ===');
@@ -304,6 +299,19 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
             optimizedContent = optimizedContent.replace(/\.\.\.$/g, '');
             console.log('After removing ellipsis:', optimizedContent);
 
+            // Ensure the content doesn't exceed the limit
+            const maxContentLength = 200 - imageNumber.length - brandSuffix.length;
+            if (optimizedContent.length > maxContentLength) {
+                console.log(`Content too long (${optimizedContent.length} chars), truncating to ${maxContentLength} chars`);
+                optimizedContent = optimizedContent.substring(0, maxContentLength).trim();
+                // Remove incomplete word at the end
+                const lastSpaceIndex = optimizedContent.lastIndexOf(' ');
+                if (lastSpaceIndex > maxContentLength * 0.8) { // Only if we're not cutting too much
+                    optimizedContent = optimizedContent.substring(0, lastSpaceIndex);
+                }
+                console.log('After truncation:', optimizedContent);
+            }
+
             const finalAltText = optimizedContent + imageNumber + brandSuffix;
             console.log('\n=== FINAL ALT TEXT ===');
             console.log('Final alt text:', finalAltText);
@@ -315,8 +323,17 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
             console.log('Using fallback: original product title');
         }
 
-        // Fallback: use full title
-        const fallbackAltText = productTitle + imageNumber + brandSuffix;
+        // Fallback: use truncated product title
+        const maxContentLength = 200 - imageNumber.length - brandSuffix.length;
+        let fallbackContent = productTitle;
+        if (fallbackContent.length > maxContentLength) {
+            fallbackContent = fallbackContent.substring(0, maxContentLength).trim();
+            const lastSpaceIndex = fallbackContent.lastIndexOf(' ');
+            if (lastSpaceIndex > maxContentLength * 0.8) {
+                fallbackContent = fallbackContent.substring(0, lastSpaceIndex);
+            }
+        }
+        const fallbackAltText = fallbackContent + imageNumber + brandSuffix;
         console.log('\n=== FALLBACK ALT TEXT ===');
         console.log('Fallback alt text:', fallbackAltText);
         return fallbackAltText;
@@ -325,8 +342,17 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
         console.error('\n!!! ERROR GENERATING OPTIMIZED ALT TEXT !!!');
         console.error('Error details:', error);
 
-        // Fallback: use full title
-        const fallbackAltText = productTitle + imageNumber + brandSuffix;
+        // Fallback: use truncated product title
+        const maxContentLength = 200 - imageNumber.length - brandSuffix.length;
+        let fallbackContent = productTitle;
+        if (fallbackContent.length > maxContentLength) {
+            fallbackContent = fallbackContent.substring(0, maxContentLength).trim();
+            const lastSpaceIndex = fallbackContent.lastIndexOf(' ');
+            if (lastSpaceIndex > maxContentLength * 0.8) {
+                fallbackContent = fallbackContent.substring(0, lastSpaceIndex);
+            }
+        }
+        const fallbackAltText = fallbackContent + imageNumber + brandSuffix;
         console.log('\n=== ERROR FALLBACK ALT TEXT ===');
         console.log('Error fallback alt text:', fallbackAltText);
         return fallbackAltText;
@@ -472,8 +498,8 @@ async function updateMediaAltText(mediaId, altText, retries = 3) {
             if (errors) {
                 console.error('GraphQL errors:', errors);
                 if (attempt < retries) {
-                    console.log('Retrying...');
-                    await new Promise((resolve) => setTimeout(resolve, 2000 * attempt));
+                    console.log(`Retrying in ${3000 * attempt}ms...`);
+                    await new Promise((resolve) => setTimeout(resolve, 3000 * attempt));
                 }
                 continue;
             }
@@ -691,8 +717,8 @@ async function updateAltTextFromSheet(range) {
                 console.log(`✗ Failed to update alt text for image ${imageIndex}`);
             }
 
-            // Rate limiting
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            // Rate limiting - increased delay to avoid API limits
+            await new Promise((resolve) => setTimeout(resolve, 2000));
         }
 
         // Record the results in Google Sheets
