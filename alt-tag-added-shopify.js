@@ -215,40 +215,58 @@ function generateImageName(productTitle, variantInfo = '', imageIndex = 1, isSha
 }
 
 // Function to generate alt text using Gemini AI
-async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, maxLength = 125, variantCount = 0) {
+async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, maxLength = 140, variantCount = 0) {
     // Required components that must always be included
     const imageNumber = ` | img_${imageIndex}`;
     const brandSuffix = ' | Foxx Life Sciences Global | shopfls.com';
     const requiredSuffixLength = imageNumber.length + brandSuffix.length;
     
-    // Calculate max content length with stricter limits
-    const maxContentLength = maxLength - requiredSuffixLength - 10; // More buffer for safety
+    // Calculate max content length - be more generous
+    const maxContentLength = maxLength - requiredSuffixLength - 2; // Minimal buffer
     
-    // For very long product titles, create a short version first
-    let shortProductTitle = productTitle;
-    if (productTitle.length > 40) {
-        // Extract key product identifiers and features
+    // Smart title processing - preserve important parts
+    let processedTitle = productTitle;
+    
+    // Only shorten if the full title + suffixes would exceed the limit
+    const fullLength = productTitle.length + requiredSuffixLength;
+    if (fullLength > maxLength) {
+        // Try to preserve key parts of the title
         const words = productTitle.split(' ');
-        const importantWords = words.filter(word => 
-            word.length > 2 && 
-            !['with', 'for', 'and', 'the', 'of', 'in', 'on', 'at'].includes(word.toLowerCase())
-        ).slice(0, 6); // Take first 6 important words
-        shortProductTitle = importantWords.join(' ');
+        let shortTitle = '';
+        
+        // Always keep the first few important words
+        for (let i = 0; i < words.length; i++) {
+            const testTitle = shortTitle + (shortTitle ? ' ' : '') + words[i];
+            if (testTitle.length <= maxContentLength) {
+                shortTitle = testTitle;
+            } else {
+                break;
+            }
+        }
+        
+        // If we have a reasonable length title, use it
+        if (shortTitle.length > 20) {
+            processedTitle = shortTitle;
+        } else {
+            // If too short, take the first part of the original title
+            processedTitle = productTitle.substring(0, maxContentLength);
+        }
     }
     
-    const prompt = `Shorten this product title to under ${Math.min(maxContentLength, 50)} characters while keeping the most important product features:
+    const prompt = `Optimize this product title for SEO while keeping it under ${maxContentLength} characters:
 
-    "${shortProductTitle}"
+    "${processedTitle}"
     
     Requirements:
-    - Maximum ${Math.min(maxContentLength, 50)} characters
-    - Keep brand names and model numbers if present
-    - Keep key product features
-    - Remove unnecessary words like "for", "with", "and"
-    - Make it concise but descriptive
-    - DO NOT add anything extra
+    - Maximum ${maxContentLength} characters
+    - Keep all brand names (like EZBio®, Foxx, etc.)
+    - Keep model numbers and key identifiers
+    - Keep essential product features
+    - Make it concise but complete
+    - DO NOT add ellipsis or dots
+    - DO NOT add any extra text
     
-    Return only the shortened title, nothing else.`;
+    Return only the optimized title, nothing else.`;
 
     try {
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
@@ -272,32 +290,26 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1, m
             // Remove quotes if Gemini added them
             optimizedContent = optimizedContent.replace(/^["']|["']$/g, '');
             
-            // Ensure it's not too long - be very strict
-            if (optimizedContent.length > maxContentLength) {
-                optimizedContent = optimizedContent.substring(0, maxContentLength - 3) + '...';
-            }
+            // Remove any ellipsis that Gemini might have added
+            optimizedContent = optimizedContent.replace(/\.\.\.$/g, '');
             
-            // Final length check before adding suffixes
-            const finalText = optimizedContent + imageNumber + brandSuffix;
-            if (finalText.length > maxLength) {
-                // If still too long, cut more from the content
-                const excessLength = finalText.length - maxLength;
-                optimizedContent = optimizedContent.substring(0, optimizedContent.length - excessLength - 3) + '...';
+            // Final trim and length check
+            if (optimizedContent.length > maxContentLength) {
+                // If still too long, trim without adding ellipsis
+                optimizedContent = optimizedContent.substring(0, maxContentLength).trim();
             }
             
             return optimizedContent + imageNumber + brandSuffix;
         }
         
-        // Fallback: create very short version manually
-        let baseAltText = shortProductTitle.substring(0, maxContentLength - 3) + '...';
-        return baseAltText + imageNumber + brandSuffix;
+        // Fallback: use processed title without ellipsis
+        return processedTitle + imageNumber + brandSuffix;
         
     } catch (error) {
         console.error('Error generating optimized alt text with Gemini:', error);
         
-        // Fallback: create very short version manually
-        let baseAltText = shortProductTitle.substring(0, maxContentLength - 3) + '...';
-        return baseAltText + imageNumber + brandSuffix;
+        // Fallback: use processed title without ellipsis
+        return processedTitle + imageNumber + brandSuffix;
     }
 }
 
