@@ -233,21 +233,21 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
     - Keep all brand names: EZBio®, Foxx, VersaCap®, etc.
     - Keep model numbers: 83B, etc.
     - Keep key specifications: 40L, 50L, etc.
-    
+
     ENHANCE WITH (if space allows):
     - Key adjectives (premium, laboratory-grade, leak-proof)
     - Usage context (laboratory, bioprocessing, research)
     - Essential product benefits
-    
+
     WRITE STYLE:
     - Concise and informative
     - Professional terminology
     - Essential keywords for SEO
     - Complete phrases, avoid unnecessary words
-    
+
     Example:
     Instead of long descriptions, create: "Premium EZBio® Silicone Cap System with VersaCap® 83B for 40L/50L Carboys - Laboratory-Grade Leak-Proof Bioprocessing Equipment"
-    
+
     Return ONLY the enhanced description under ${maxContentLength} characters, nothing else.`;
 
     try {
@@ -269,7 +269,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
         };
 
         console.log('\nSending request to Gemini API...');
-        
+
         const response = await fetch(`${geminiTextApiUrl}?key=${geminiApiKey}`, {
             method: 'POST',
             headers: {
@@ -279,15 +279,15 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
         });
 
         console.log('Gemini API Response Status:', response.status, response.statusText);
-        
+
         const data = await response.json();
-        
+
         console.log('\n=== GEMINI API FULL RESPONSE ===');
         console.log(JSON.stringify(data, null, 2));
-        
+
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
             let optimizedContent = data.candidates[0].content.parts[0].text.trim();
-            
+
             console.log('\n=== GEMINI GENERATED CONTENT ===');
             console.log('Raw Gemini Output:', optimizedContent);
 
@@ -316,7 +316,7 @@ async function generateAltText(productTitle, variantInfo = '', imageIndex = 1) {
             console.log('\n=== FINAL ALT TEXT ===');
             console.log('Final alt text:', finalAltText);
             console.log('Character count:', finalAltText.length);
-            
+
             return finalAltText;
         } else {
             console.log('\n!!! GEMINI RESPONSE MISSING EXPECTED STRUCTURE !!!');
