@@ -246,29 +246,77 @@ function calculateSimilarityScore(urlKeywords, item) {
     return totalKeywords > 0 ? score / totalKeywords : 0;
 }
 
-// Function to find best matching product or collection
-function findBestMatch(urlKeywords, products, collections) {
+// Function to determine the original URL type (product or collection)
+function getOriginalUrlType(url) {
+    try {
+        const urlObj = new URL(url);
+        const pathname = urlObj.pathname;
+        
+        // Check if URL contains /collections/
+        if (pathname.includes('/collections/')) {
+            return 'collection';
+        }
+        // Check if URL contains /products/
+        if (pathname.includes('/products/')) {
+            return 'product';
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error determining URL type:', error);
+        return null;
+    }
+}
+
+// Function to find best matching product or collection with type preference
+function findBestMatch(urlKeywords, products, collections, preferredType = null) {
     let bestMatch = null;
     let bestScore = 0;
     let matchType = null;
 
-    // Check products
-    for (const product of products) {
-        const score = calculateSimilarityScore(urlKeywords, product);
-        if (score > bestScore) {
-            bestScore = score;
-            bestMatch = product;
-            matchType = 'product';
+    // If we have a preferred type, search that type first and only return matches from that type
+    if (preferredType === 'product') {
+        console.log('Searching for product matches only (original URL was a product)');
+        for (const product of products) {
+            const score = calculateSimilarityScore(urlKeywords, product);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = product;
+                matchType = 'product';
+            }
         }
-    }
+    } else if (preferredType === 'collection') {
+        console.log('Searching for collection matches only (original URL was a collection)');
+        for (const collection of collections) {
+            const score = calculateSimilarityScore(urlKeywords, collection);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = collection;
+                matchType = 'collection';
+            }
+        }
+    } else {
+        // No preference - search both (fallback behavior)
+        console.log('No URL type preference - searching both products and collections');
+        
+        // Check products
+        for (const product of products) {
+            const score = calculateSimilarityScore(urlKeywords, product);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = product;
+                matchType = 'product';
+            }
+        }
 
-    // Check collections
-    for (const collection of collections) {
-        const score = calculateSimilarityScore(urlKeywords, collection);
-        if (score > bestScore) {
-            bestScore = score;
-            bestMatch = collection;
-            matchType = 'collection';
+        // Check collections
+        for (const collection of collections) {
+            const score = calculateSimilarityScore(urlKeywords, collection);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = collection;
+                matchType = 'collection';
+            }
         }
     }
 
@@ -428,8 +476,16 @@ async function process404Redirects() {
             continue;
         }
 
-        // Find best matching product or collection using similarity
-        const bestMatch = findBestMatch(urlKeywords, products, collections);
+        // Determine the original URL type to preserve the same type in redirect
+        const originalUrlType = getOriginalUrlType(redirectFromUrl);
+        if (originalUrlType) {
+            console.log(`Original URL type detected: ${originalUrlType}`);
+        } else {
+            console.log('Could not determine original URL type');
+        }
+
+        // Find best matching product or collection using similarity with type preference
+        const bestMatch = findBestMatch(urlKeywords, products, collections, originalUrlType);
 
         if (bestMatch) {
             const redirectUrl = bestMatch.type === 'product' 
@@ -442,19 +498,30 @@ async function process404Redirects() {
             if (isValidUrl) {
                 console.log(`Found ${bestMatch.type} match: ${bestMatch.match.title}`);
                 console.log(`Similarity score: ${bestMatch.score.toFixed(2)}`);
-                console.log(`Redirect To: ${redirectUrl} (URL validated as existing)`);
+                if (originalUrlType && originalUrlType === bestMatch.type) {
+                    console.log(`✓ URL type preserved: ${originalUrlType} → ${bestMatch.type}`);
+                } else if (originalUrlType) {
+                    console.log(`⚠ URL type changed: ${originalUrlType} → ${bestMatch.type} (no better match found in same type)`);
+                }
+                console.log(`Redirect To: ${redirectUrl} (URL validated as existing in Shopify)`);
                 
                 await updateRedirectTo(i + 1, redirectUrl);
             } else {
                 console.log(`Found ${bestMatch.type} match: ${bestMatch.match.title}`);
                 console.log(`Similarity score: ${bestMatch.score.toFixed(2)}`);
-                console.log(`WARNING: Suggested URL ${redirectUrl} does not exist in Shopify!`);
+                console.log(`❌ ERROR: Suggested URL ${redirectUrl} does not exist in Shopify!`);
+                console.log(`This should not happen - there may be a data synchronization issue`);
                 console.log(`Redirecting to home page instead`);
                 
                 await updateRedirectTo(i + 1, '/');
             }
         } else {
-            console.log('No suitable match found - redirecting to home page');
+            if (originalUrlType) {
+                console.log(`No suitable ${originalUrlType} match found for original ${originalUrlType} URL`);
+            } else {
+                console.log('No suitable match found');
+            }
+            console.log('Redirecting to home page');
             await updateRedirectTo(i + 1, '/');
         }
 
