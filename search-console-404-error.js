@@ -284,6 +284,73 @@ function findBestMatch(urlKeywords, products, collections) {
     return null;
 }
 
+// Function to validate if a redirect URL exists in Shopify
+function validateRedirectUrl(redirectUrl, products, collections) {
+    // Remove leading slash if present
+    const cleanUrl = redirectUrl.startsWith('/') ? redirectUrl.substring(1) : redirectUrl;
+    
+    // Check if it's a product URL
+    if (cleanUrl.startsWith('products/')) {
+        const handle = cleanUrl.replace('products/', '');
+        return products.some(product => product.handle === handle);
+    }
+    
+    // Check if it's a collection URL
+    if (cleanUrl.startsWith('collections/')) {
+        const handle = cleanUrl.replace('collections/', '');
+        return collections.some(collection => collection.handle === handle);
+    }
+    
+    // If it's just '/' (home page), it's always valid
+    if (cleanUrl === '' || cleanUrl === '/') {
+        return true;
+    }
+    
+    return false;
+}
+
+// Function to find exact URL match in existing products/collections
+function findExactUrlMatch(redirectFromUrl, products, collections) {
+    try {
+        const urlObj = new URL(redirectFromUrl);
+        const pathname = urlObj.pathname;
+        
+        // Check if the URL points to a product
+        const productMatch = pathname.match(/\/products\/([^\/\?]+)/);
+        if (productMatch) {
+            const handle = productMatch[1];
+            const product = products.find(p => p.handle === handle);
+            if (product) {
+                return {
+                    match: product,
+                    type: 'product',
+                    score: 1.0,
+                    exactMatch: true
+                };
+            }
+        }
+        
+        // Check if the URL points to a collection
+        const collectionMatch = pathname.match(/\/collections\/([^\/\?]+)/);
+        if (collectionMatch) {
+            const handle = collectionMatch[1];
+            const collection = collections.find(c => c.handle === handle);
+            if (collection) {
+                return {
+                    match: collection,
+                    type: 'collection',
+                    score: 1.0,
+                    exactMatch: true
+                };
+            }
+        }
+    } catch (error) {
+        console.error('Error parsing URL for exact match:', error);
+    }
+    
+    return null;
+}
+
 // Main function to process 404 redirects
 async function process404Redirects() {
     console.log('Starting 404 redirect processing...');
@@ -336,7 +403,22 @@ async function process404Redirects() {
             continue;
         }
 
-        // Extract keywords from URL
+        // First, try to find exact URL match (if the original URL structure exists in Shopify)
+        const exactMatch = findExactUrlMatch(redirectFromUrl, products, collections);
+        if (exactMatch && exactMatch.exactMatch) {
+            const redirectUrl = exactMatch.type === 'product' 
+                ? `/products/${exactMatch.match.handle}`
+                : `/collections/${exactMatch.match.handle}`;
+            
+            console.log(`Found EXACT ${exactMatch.type} match: ${exactMatch.match.title}`);
+            console.log(`Original URL structure exists in Shopify`);
+            console.log(`Redirect To: ${redirectUrl}`);
+            
+            await updateRedirectTo(i + 1, redirectUrl);
+            continue;
+        }
+
+        // Extract keywords from URL for similarity matching
         const urlKeywords = extractKeywordsFromUrl(redirectFromUrl);
         console.log(`Extracted keywords: ${urlKeywords.join(', ')}`);
 
@@ -346,7 +428,7 @@ async function process404Redirects() {
             continue;
         }
 
-        // Find best matching product or collection
+        // Find best matching product or collection using similarity
         const bestMatch = findBestMatch(urlKeywords, products, collections);
 
         if (bestMatch) {
@@ -354,11 +436,23 @@ async function process404Redirects() {
                 ? `/products/${bestMatch.match.handle}`
                 : `/collections/${bestMatch.match.handle}`;
             
-            console.log(`Found ${bestMatch.type} match: ${bestMatch.match.title}`);
-            console.log(`Similarity score: ${bestMatch.score.toFixed(2)}`);
-            console.log(`Redirect To: ${redirectUrl}`);
+            // Validate that the suggested URL actually exists
+            const isValidUrl = validateRedirectUrl(redirectUrl, products, collections);
             
-            await updateRedirectTo(i + 1, redirectUrl);
+            if (isValidUrl) {
+                console.log(`Found ${bestMatch.type} match: ${bestMatch.match.title}`);
+                console.log(`Similarity score: ${bestMatch.score.toFixed(2)}`);
+                console.log(`Redirect To: ${redirectUrl} (URL validated as existing)`);
+                
+                await updateRedirectTo(i + 1, redirectUrl);
+            } else {
+                console.log(`Found ${bestMatch.type} match: ${bestMatch.match.title}`);
+                console.log(`Similarity score: ${bestMatch.score.toFixed(2)}`);
+                console.log(`WARNING: Suggested URL ${redirectUrl} does not exist in Shopify!`);
+                console.log(`Redirecting to home page instead`);
+                
+                await updateRedirectTo(i + 1, '/');
+            }
         } else {
             console.log('No suitable match found - redirecting to home page');
             await updateRedirectTo(i + 1, '/');
